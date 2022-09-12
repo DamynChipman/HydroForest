@@ -16,17 +16,23 @@ private:
 
 public:
     
-    HydroForestApp(int* argc, cahr*** argv) : argc_(argc), argv_(argv) {
+    HydroForestApp(int* argc, char*** argv) : argc_(argc), argv_(argv) {
         std::cout << "[HydroForest] Welcome to HydroForest!" << std::endl;
         std::cout << "[HydroForest] Initializing MPI and PETSc..." << std::endl;
         MPI_Init(argc_, argv_);
         PetscInitialize(argc_, argv_, NULL, NULL);
     }
 
+    ~HydroForestApp() {
+        std::cout << "[HydroForest] End of app life cycle, finalizing..." << std::endl;
+        PetscFinalize();
+        MPI_Finalize();
+    }
+
     int* getArgc() const { return argc_; }
     char*** getArgv() const { return argv_; }
 
-}
+};
 
 
 } // NAMESPACE: hf

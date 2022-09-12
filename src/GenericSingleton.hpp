@@ -33,7 +33,7 @@ private:
 };
 
 template<class ActualClass>
-ActualClass* GenericSingleton<ActualClass>::actualClassPointer_{nullptr};
+ActualClass* GenericSingleton<ActualClass>::actualClassPointer_;
 
 template<class ActualClass>
 std::mutex GenericSingleton<ActualClass>::mutex_;

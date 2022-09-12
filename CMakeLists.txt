@@ -17,5 +17,5 @@ set(
 
 add_executable(main ${SOURCES})
 target_link_directories(main PUBLIC ${P4EST_BUILD}/lib ${HOMEBREW_DIR}/lib)
-target_include_directories(main PUBLIC ${P4EST_BUILD}/include ${HOMEBREW_DIR}/include)
+target_include_directories(main PUBLIC ${P4EST_BUILD}/include ${HOMEBREW_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(main petsc p4est sc z)
