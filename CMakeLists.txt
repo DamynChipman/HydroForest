@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.21)
+project("P4EST_SANDBOX")
+
+set(
+    P4EST_BUILD
+    /Users/damynchipman/packages/p4est/p4est_source_git/build/local
+)
+set(
+    HOMEBREW_DIR
+    /opt/homebrew
+)
+
+set(
+    SOURCES
+    main.cpp
+)
+
+add_executable(main ${SOURCES})
+target_link_directories(main PUBLIC ${P4EST_BUILD}/lib ${HOMEBREW_DIR}/lib)
+target_include_directories(main PUBLIC ${P4EST_BUILD}/include ${HOMEBREW_DIR}/include)
+target_link_libraries(main petsc p4est sc z)
