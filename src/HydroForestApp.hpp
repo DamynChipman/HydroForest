@@ -4,8 +4,10 @@
 #include <p4est.h>
 #include <petsc.h>
 #include "GenericSingleton.hpp"
+#include "Logger.hpp"
+#include "Options.hpp"
 
-namespace hf {
+namespace HydroForest {
 
 class HydroForestApp : public GenericSingleton<HydroForestApp> {
 
@@ -13,28 +15,49 @@ private:
 
     int* argc_;
     char*** argv_;
+    Logger logger_;
+    Options options_;
 
 public:
+
+    HydroForestApp() : argc_(nullptr), argv_(nullptr) {}
     
     HydroForestApp(int* argc, char*** argv) : argc_(argc), argv_(argv) {
-        std::cout << "[HydroForest] Welcome to HydroForest!" << std::endl;
-        std::cout << "[HydroForest] Initializing MPI and PETSc..." << std::endl;
         MPI_Init(argc_, argv_);
         PetscInitialize(argc_, argv_, NULL, NULL);
+        
+        int myRank = -1;
+        MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+        if (myRank == 0) {
+            std::cout << "[HydroForest] Welcome to HydroForest!" << std::endl;
+        }
+        this->actualClassPointer_ = this;
+
     }
 
     ~HydroForestApp() {
-        std::cout << "[HydroForest] End of app life cycle, finalizing..." << std::endl;
+        int myRank = -1;
+        MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+        if (myRank == 0) {
+            std::cout << "[HydroForest] End of app life cycle, finalizing..." << std::endl;
+        }
         PetscFinalize();
         MPI_Finalize();
     }
 
     int* getArgc() const { return argc_; }
     char*** getArgv() const { return argv_; }
+    Logger& getLogger() { return logger_; }
+    Options& getOptions() { return options_; }
+
+    template<class... Args>
+    void log(std::string message, Args... args) {
+        logger_.log(message, args...);
+    }
 
 };
 
 
-} // NAMESPACE: hf
+} // NAMESPACE: HydroForest
 
 #endif // HYDRO_FOREST_APP_HPP_

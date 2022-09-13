@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
-project("P4EST_SANDBOX")
+project("HydroForest")
+set(CMAKE_CXX_STANDARD 20)
 
 set(
     P4EST_BUILD
@@ -13,6 +14,7 @@ set(
 set(
     SOURCES
     main.cpp
+    src/Options.cpp
 )
 
 add_executable(main ${SOURCES})
