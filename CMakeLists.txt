@@ -15,6 +15,7 @@ set(
     SOURCES
     main.cpp
     src/Options.cpp
+    src/VTKBuilder.cpp
 )
 
 add_executable(main ${SOURCES})

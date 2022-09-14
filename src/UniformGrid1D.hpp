@@ -2,11 +2,12 @@
 #define UNIFORM_GRID_1D_HPP_
 
 #include "Grid1DBase.hpp"
+#include "VTKBuilder.hpp"
 
 namespace HydroForest {
 
 template<typename DataType>
-class UniformGrid1D : public Grid1DBase<DataType> {
+class UniformGrid1D : public Grid1DBase<DataType>, public RectilinearGridNodeBase, public DataArrayNodeBase {
 
 public:
 
@@ -24,6 +25,49 @@ public:
 
     DataType getLowerBound() { return lowerBound_; }
     DataType getUpperBound() { return upperBound_; }
+
+    std::string getWholeExtent() {
+        return "0 " + std::to_string(nPoints_) + " 0 0 0 0";
+    }
+
+    std::string getExtent() {
+        return "0 " + std::to_string(nPoints_) + " 0 0 0 0";
+    }
+
+    std::string getType() {
+        return "Float32";
+    }
+
+    std::string getName() {
+        return "UniformGrid1d";
+    }
+
+    std::string getNumberOfComponents() {
+        return "1";
+    }
+
+    std::string getFormat() {
+        return "ascii";
+    }
+
+    std::string getRangeMin() {
+        return std::to_string(lowerBound_);
+    }
+
+    std::string getRangeMax() {
+        return std::to_string(upperBound_);
+    }
+
+    std::string getData() {
+        if (nPoints_ == 0) {
+            return "0";
+        }
+        else {
+            std::string pointsAsString = "";
+            for (auto& p : points_) pointsAsString += std::to_string(p) + " ";
+            return pointsAsString;
+        }
+    }
 
 private:
 
