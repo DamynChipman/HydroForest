@@ -1,10 +1,23 @@
-#ifndef UNIFORM_GRID_1D_HPP_
-#define UNIFORM_GRID_1D_HPP_
+#ifndef GRID_1D_HPP_
+#define GRID_1D_HPP_
 
-#include "Grid1DBase.hpp"
+#include <vector>
+
 #include "VTKBuilder.hpp"
 
 namespace HydroForest {
+
+template<typename DataType>
+class Grid1DBase {
+
+public:
+
+    virtual std::vector<DataType> getPoints() = 0;
+    virtual std::size_t getNPoints() = 0;
+    virtual DataType getLowerBound() = 0;
+    virtual DataType getUpperBound() = 0;
+
+};
 
 template<typename DataType>
 class UniformGrid1D : public Grid1DBase<DataType>, public RectilinearGridNodeBase, public DataArrayNodeBase {
@@ -79,4 +92,4 @@ private:
 
 } // NAMESPACE: HydroForest
 
-#endif // UNIFORM_GRID_1D_HPP_
+#endif // GRID_1D_HPP_
