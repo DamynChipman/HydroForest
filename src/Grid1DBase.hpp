@@ -12,6 +12,7 @@ class Grid1DBase {
 public:
 
     virtual std::vector<DataType> getPoints() = 0;
+    virtual std::size_t getNPoints() = 0;
     virtual DataType getLowerBound() = 0;
     virtual DataType getUpperBound() = 0;
 

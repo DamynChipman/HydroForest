@@ -19,10 +19,8 @@ public:
         }
     }
 
-    std::vector<DataType> getPoints() {
-        return points_;
-    }
-
+    std::vector<DataType> getPoints() { return points_; }
+    std::size_t getNPoints() { return points_.size(); }
     DataType getLowerBound() { return lowerBound_; }
     DataType getUpperBound() { return upperBound_; }
 
