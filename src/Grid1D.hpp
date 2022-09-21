@@ -1,7 +1,9 @@
 #ifndef GRID_1D_HPP_
 #define GRID_1D_HPP_
 
+#include <cmath>
 #include <vector>
+#include <algorithm>
 
 #include "Polynomial.hpp"
 #include "VTKBuilder.hpp"
@@ -99,13 +101,13 @@ public:
 
     ChebyshevGrid1D(std::size_t order) : order_(order), points_(order+1), weights_(order+1) {
 
-        for (int i = 0; i <= order_; i++) {
-            points_[i] = cos((2.0*i + 1.0)/(2.0*order_ + 2.0) * M_PI);
+        for (int i = 0; i <= order; i++) {
+            points_[i] = cos((2.0*i + 1.0)/(2.0*order + 2.0) * M_PI);
+            weights_[i] = (M_PI) / (order + 1.0);
         }
 
-        for (int i = 0; i<= order_; i++) {
-            weights_[i] = (M_PI) / (order_ + 1.0);
-        }
+        std::sort(points_.begin(), points_.end());
+        std::sort(weights_.begin(), weights_.end());
 
     }
 
@@ -135,60 +137,31 @@ public:
 
     struct RootSolver : public NewtonRaphsonSolver<LegendreGrid1D> {
 
-        LegendreGrid1D& actualClass;
-
-        RootSolver(LegendreGrid1D& actualClass, double tolerance, int maxIterations) : NewtonRaphsonSolver<LegendreGrid1D>(actualClass, tolerance, maxIterations), actualClass(actualClass) {}
+        // RootSolver() : NewtonRaphsonSolver<LegendreGrid1D>() {}
+        RootSolver(LegendreGrid1D& actualClass) : NewtonRaphsonSolver<LegendreGrid1D>(actualClass) {}
 
         double objectiveFunction(double x) {
-            return actualClass.poly.evalD012(x)[0];
+            double f = this->actualClass.poly(x);
+            return this->actualClass.poly(x);
         }
 
         double objectiveDerivative(double x) {
-            return actualClass.poly.evalD012(x)[1];
+            return this->actualClass.poly.evalD012(x)[1];
         }
 
     };
 
-    LegendreGrid1D(std::size_t N) : order_(N), points_(N), weights_(N), poly(N) {
+    LegendreGrid1D(std::size_t order) : order_(order), points_(order+1), weights_(order+1), poly(order+1) {
 
-        RootSolver solver(*this, 1e-16, 1000);
-        ChebyshevGrid1D<FloatingDataType> chebyGrid(N);
-        for (int i = 0; i <= points_.size(); i++) {
-            double xLower = chebyGrid.getPoints()[i] - 1;
-            double xUpper = chebyGrid.getPoints()[i] + 1;
-            points_[i] = solver.solve(xLower, xUpper);
+        RootSolver solver(*this);
+        solver.tolerance = 1e-15;
+        ChebyshevGrid1D<FloatingDataType> chebyGrid(order);
+        for (int i = 0; i < points_.size(); i++) {
+            points_[i] = solver.solve(chebyGrid.getPoints()[i]);
+            
+            double dPhi = poly.evalD012(points_[i])[1];
+            weights_[i] = (2.0) / ((1.0 - pow(points_[i],2)) * pow(dPhi, 2));
         }
-
-        // int p = order_;
-        // int ph = floor((p + 1) / 2);
-
-        // for (int i = 0; i < ph; i++) {
-        //     double ii = i + 1.0;
-        //     double x = cos((2.0*ii - 1.0)*M_PI / (2.0*p + 1.0));
-        //     std::vector<double> L;
-        //     for (int k = 0; k < 20; k++) {
-        //         L = poly(x);
-        //         double dx = -L[0] / L[1];
-        //         x = x + dx;
-        //         if (abs(x) < 1e-16) {
-        //             break;
-        //         }
-        //     }
-        //     points_[p + 2 - i] = x;
-        //     weights_[p + 2 - i] = 2.0 / ((1.0 - pow(x,2))*pow(L[1],2));
-        // }
-
-        // if (p + 1 != 2*ph) {
-        //     double x = 0.0;
-        //     std::vector<double> L = poly(x);
-        //     points_[ph + 1] = x;
-        //     weights_[ph + 1] = 2.0 / ((1.0 - pow(x,2))*pow(L[1],2));
-        // }
-
-        // for (int i = 0; i < ph; i++) {
-        //     points_[i] = -points_[p + 2 - i];
-        //     weights_[i] = weights_[p + 2 - i];
-        // }
 
     }
 
@@ -202,7 +175,73 @@ private:
     std::size_t order_;
     std::vector<FloatingDataType> points_;
     std::vector<FloatingDataType> weights_;
-    
+
+};
+
+template <typename FloatingDataType>
+class LobattoGrid1D : public Grid1DBase<FloatingDataType> {
+
+public:
+
+    LegendrePolynomial poly;
+
+    struct RootSolver : public NewtonRaphsonSolver<LobattoGrid1D> {
+
+        RootSolver(LobattoGrid1D& actualClass) : NewtonRaphsonSolver<LobattoGrid1D>(actualClass) {}
+
+        double objectiveFunction(double x) {
+            std::vector<double> phiLegendreValues = this->actualClass.poly.evalD012(x);
+            return (1.0 - pow(x,2))*phiLegendreValues[1];
+        }
+
+        double objectiveDerivative(double x) {
+            std::vector<double> phiLegendreValues = this->actualClass.poly.evalD012(x);
+            return -2.0*x*phiLegendreValues[1] + (1.0 - pow(x,2))*phiLegendreValues[2];
+        }
+
+    };
+
+    LobattoGrid1D(std::size_t order) : order_(order), points_(order+1, 0), weights_(order+1), poly(order) {
+
+        RootSolver solver(*this);
+        solver.tolerance = 1e-15;
+        ChebyshevGrid1D<FloatingDataType> chebyGrid(order);
+
+        points_[0] = -1.0;
+        points_[points_.size()-1] = 1.0;
+
+        if (points_.size() % 2) {
+            // Odd number of points; end points are -1, 1; middle is 0; rest are found via solver
+            points_[(points_.size()-1) / 2] = 0.0;
+            for (int i = 1; i < points_.size()-1; i++) {
+                if (i != (points_.size()-1)/2) {
+                    points_[i] = solver.solve(chebyGrid.getPoints()[i]);
+                }
+            }
+        }
+        else {
+            // Even number of points; end points are -1, 1; rest are found via solver
+            for (int i = 1; i < points_.size()-1; i++) {
+                points_[i] = solver.solve(chebyGrid.getPoints()[i]);
+            }
+        }
+
+        for (int i = 0; i < weights_.size(); i++) {
+            weights_[i] = (2.0) / (order*(order + 1)*pow(poly(points_[i]),2));
+        }
+
+    }
+
+    std::vector<FloatingDataType> getPoints() { return points_; }
+    std::size_t getNPoints() { return points_.size(); }
+    FloatingDataType getLowerBound() { return -1.0; }
+    FloatingDataType getUpperBound() { return 1.0; }
+
+private:
+
+    std::size_t order_;
+    std::vector<FloatingDataType> points_;
+    std::vector<FloatingDataType> weights_;
 
 };
 

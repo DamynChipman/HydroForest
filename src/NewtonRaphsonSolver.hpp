@@ -14,19 +14,22 @@ class NewtonRaphsonSolver {
 
 public:
 
-    double tolerance = 1e-16;
+    ClassName& actualClass;
+    double tolerance = 1e-12;
     int maxIterations = 1000;
 
     virtual double objectiveFunction(double x) = 0;
     virtual double objectiveDerivative(double x) = 0;
 
-    NewtonRaphsonSolver(ClassName& actualClass, double tolerance, int maxIterations) : tolerance(tolerance), maxIterations(maxIterations) {}
+    NewtonRaphsonSolver(ClassName& actualClass) : actualClass(actualClass), tolerance(1e-16), maxIterations(1000) {}
+    NewtonRaphsonSolver(ClassName& actualClass, double tolerance, int maxIterations) : actualClass(actualClass), tolerance(tolerance), maxIterations(maxIterations) {}
 
     double solve(double xLowerBound, double xUpperBound) {
         double xLow, xHigh;
         double fLow = objectiveFunction(xLowerBound);
         double fHigh = objectiveFunction(xUpperBound);
         if ((fLow > 0.0 && fHigh > 0.0) || (fLow < 0.0 && fHigh < 0.0)) {
+            std::cerr << "[HydroForest::NewtonRaphsonSolver::solve] Root must be bracketed by `xLowerBound` and `xUpperBound`" << std::endl;
             throw HydroForestException("Root must be bracketed by `xLowerBound` and `xUpperBound`");
         }
 
@@ -69,6 +72,23 @@ public:
                 xHigh = rts;
             }
         }
+        std::cerr << "[HydroForest::NewtonRaphsonSolver::solve] Maximum number of iterations reached in solve!" << std::endl;
+        throw HydroForestException("Maximum number of iterations reached in solve!");
+    }
+
+    double solve(double xGuess) {
+        double x_j = xGuess;
+        double x_jp1;
+        for (int j = 0; j < maxIterations; j++) {
+            double f = objectiveFunction(x_j);
+            double df = objectiveDerivative(x_j);
+            x_jp1 = x_j - (f / df);
+            if (abs(x_jp1 - x_j) < tolerance) {
+                return x_jp1;
+            }
+            x_j = x_jp1;
+        }
+        std::cerr << "[HydroForest::NewtonRaphsonSolver::solve] Maximum number of iterations reached in solve!" << std::endl;
         throw HydroForestException("Maximum number of iterations reached in solve!");
     }
 
