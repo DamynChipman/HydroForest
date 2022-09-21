@@ -9,6 +9,25 @@
 
 namespace HydroForest {
 
+class HydroForestException : public std::exception {
+
+public:
+
+    explicit HydroForestException(const char* message) : message_(message) {}
+    explicit HydroForestException(const std::string message) : message_(message) {}
+    virtual ~HydroForestException() noexcept {}
+
+    virtual const char* what() const noexcept {
+        std::string w = "[HydroForest Exception] " + message_;
+        return w.c_str();
+    }
+
+private:
+
+    std::string message_;
+
+};
+
 class HydroForestApp : public GenericSingleton<HydroForestApp> {
 
 private:

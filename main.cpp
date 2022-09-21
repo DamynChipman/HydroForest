@@ -1,19 +1,36 @@
 #include <iostream>
+#include <vector>
+#include <matplotlibcpp.h>
 #include <HydroForestApp.hpp>
 #include <UniformGrid1D.hpp>
 #include <Options.hpp>
 #include <XMLTree.hpp>
+
+namespace plt = matplotlibcpp;
 
 int main(int argc, char** argv) {
 
     HydroForest::HydroForestApp app(&argc, &argv);
 
     HydroForest::UniformGrid1D<double> xGrid(-1, 1, 10);
-    HydroForest::UniformGrid1D<double> yGrid(2, 5, 10);
-    HydroForest::UniformGrid1D<double> zGrid(0, 0, 0);
-    HydroForest::RectilinearGridVTK vtk;
-    vtk.buildMesh(xGrid, xGrid, yGrid, zGrid);
-    vtk.toVTK("mesh.vtr");
+    std::vector<double> data(xGrid.getNPoints());
+    for (auto i = 0; i < data.size(); i++) {
+        data[i] = i * i;
+    }
+
+    plt::plot(xGrid.getPoints(), data);
+    plt::xlabel("X-points");
+    plt::ylabel("Y-points");
+    plt::title("Title goes here!");
+    // plt::save("test.png");
+    plt::show();
+
+
+    // HydroForest::UniformGrid1D<double> yGrid(2, 5, 10);
+    // HydroForest::UniformGrid1D<double> zGrid(0, 0, 0);
+    // HydroForest::RectilinearGridVTK vtk;
+    // vtk.buildMesh(xGrid, xGrid, yGrid, zGrid);
+    // vtk.toVTK("mesh.vtr");
 
     // HydroForest::XMLNode VTKNode("VTKFile");
     // VTKNode.addAttribute("type", "PolyData");
