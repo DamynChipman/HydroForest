@@ -1,6 +1,5 @@
 name: HydroForest
 channels:
-  - https://conda.software.inl.gov/public
   - conda-forge
   - defaults
 dependencies:
