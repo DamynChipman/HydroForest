@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "Vector.hpp"
 #include "Polynomial.hpp"
 #include "VTKBuilder.hpp"
 #include "NewtonRaphsonSolver.hpp"
@@ -16,10 +17,12 @@ class Grid1DBase {
 
 public:
 
-    virtual std::vector<FloatingDataType> getPoints() = 0;
+    virtual Vector<FloatingDataType> getPoints() = 0;
+    virtual Vector<FloatingDataType> getWeights() = 0;
     virtual std::size_t getNPoints() = 0;
     virtual FloatingDataType getLowerBound() = 0;
     virtual FloatingDataType getUpperBound() = 0;
+    virtual FloatingDataType operator[](std::size_t index) = 0;
 
 };
 
@@ -29,17 +32,18 @@ class UniformGrid1D : public Grid1DBase<FloatingDataType>, public RectilinearGri
 public:
 
     UniformGrid1D(FloatingDataType lowerBound, FloatingDataType upperBound, std::size_t nPoints) : lowerBound_(lowerBound), upperBound_(upperBound), nPoints_(nPoints), points_(nPoints) {
-        points_.resize(nPoints_);
         gridSpacing_ = (upperBound_ - lowerBound_) / (nPoints_ - 1);
         for (auto i = 0; i < nPoints_; i++) {
             points_[i] = lowerBound_ + i * gridSpacing_;
         }
     }
 
-    std::vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType> getWeights() { return Vector<FloatingDataType>(points_.size(), 1.0); }
     std::size_t getNPoints() { return points_.size(); }
     FloatingDataType getLowerBound() { return lowerBound_; }
     FloatingDataType getUpperBound() { return upperBound_; }
+    FloatingDataType operator[](std::size_t index) { return points_[index]; }
 
     std::string getWholeExtent() {
         return "0 " + std::to_string(nPoints_) + " 0 0 0 0";
@@ -79,7 +83,7 @@ public:
         }
         else {
             std::string pointsAsString = "";
-            for (auto& p : points_) pointsAsString += std::to_string(p) + " ";
+            // for (auto& p : points_) pointsAsString += std::to_string(p) + " ";
             return pointsAsString;
         }
     }
@@ -90,7 +94,7 @@ private:
     FloatingDataType upperBound_;
     FloatingDataType gridSpacing_;
     std::size_t nPoints_;
-    std::vector<FloatingDataType> points_;
+    Vector<FloatingDataType> points_;
 
 };
 
@@ -106,8 +110,8 @@ public:
             weights_[i] = (M_PI) / (order + 1.0);
         }
 
-        std::sort(points_.begin(), points_.end());
-        std::sort(weights_.begin(), weights_.end());
+        // std::sort(points_.data().begin(), points_.data().end());
+        // std::sort(weights_.data().begin(), weights_.data().end());
 
     }
 
@@ -115,16 +119,18 @@ public:
         return (1.0) / (sqrt(1.0 - pow(x, 2)));
     }
 
-    std::vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType> getWeights() { return weights_; }
     std::size_t getNPoints() { return points_.size(); }
     FloatingDataType getLowerBound() { return -1.0; }
     FloatingDataType getUpperBound() { return 1.0; }
+    FloatingDataType operator[](std::size_t index) { return points_[index]; }
 
 private:
 
     std::size_t order_;
-    std::vector<FloatingDataType> points_;
-    std::vector<FloatingDataType> weights_;
+    Vector<FloatingDataType> points_;
+    Vector<FloatingDataType> weights_;
 
 };
 
@@ -165,16 +171,18 @@ public:
 
     }
 
-    std::vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType> getWeights() { return weights_; }
     std::size_t getNPoints() { return points_.size(); }
     FloatingDataType getLowerBound() { return -1.0; }
     FloatingDataType getUpperBound() { return 1.0; }
+    FloatingDataType operator[](std::size_t index) { return points_[index]; }
 
 private:
 
     std::size_t order_;
-    std::vector<FloatingDataType> points_;
-    std::vector<FloatingDataType> weights_;
+    Vector<FloatingDataType> points_;
+    Vector<FloatingDataType> weights_;
 
 };
 
@@ -201,7 +209,7 @@ public:
 
     };
 
-    LobattoGrid1D(std::size_t order) : order_(order), points_(order+1, 0), weights_(order+1), poly(order) {
+    LobattoGrid1D(std::size_t order) : order_(order), points_(order+1), weights_(order+1), poly(order) {
 
         RootSolver solver(*this);
         solver.tolerance = 1e-15;
@@ -232,16 +240,18 @@ public:
 
     }
 
-    std::vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType> getWeights() { return weights_; }
     std::size_t getNPoints() { return points_.size(); }
     FloatingDataType getLowerBound() { return -1.0; }
     FloatingDataType getUpperBound() { return 1.0; }
+    FloatingDataType operator[](std::size_t index) { return points_[index]; }
 
 private:
 
     std::size_t order_;
-    std::vector<FloatingDataType> points_;
-    std::vector<FloatingDataType> weights_;
+    Vector<FloatingDataType> points_;
+    Vector<FloatingDataType> weights_;
 
 };
 

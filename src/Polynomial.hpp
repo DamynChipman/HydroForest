@@ -5,6 +5,9 @@
 #include <utility>
 #include <petscmat.h>
 
+#include "Vector.hpp"
+#include "Matrix.hpp"
+
 namespace HydroForest {
 
 /**
@@ -89,65 +92,53 @@ struct LegendrePolynomial {
 struct LagrangePolynomial {
 
     int order;
-    std::vector<double> quadraturePoints;
-    LagrangePolynomial(std::vector<double> quadraturePoints) : order(quadraturePoints.size()), quadraturePoints(quadraturePoints) {}
+    Vector<double> nodalPoints;
+    LagrangePolynomial(Vector<double> nodalPoints) : order(nodalPoints.size()), nodalPoints(nodalPoints) {}
 
-    Mat evalSamplePoints(std::vector<double> xSample) {
-        Mat L_il;
-        MatCreateDense(MPI_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, quadraturePoints.size(), xSample.size(), NULL, &L_il);
-
-        for (int l = 0; l < xSample.size(); l++) {
+    Matrix<double> operator()(Vector<double> xSample) {
+        std::size_t Q = xSample.size();
+        std::size_t N = nodalPoints.size();
+        Matrix<double> L_il(N, Q);
+        for (auto l = 0; l < Q; l++) {
             double x_l = xSample[l];
-            for (int i = 0; i < quadraturePoints.size(); i++) {
-                double x_i = quadraturePoints[i];
-                double entry_il = 1.0;
-                for (int j = 0; j < quadraturePoints.size(); j++) {
-                    double x_j = quadraturePoints[j];
-                    if (j != i) {
-                        entry_il *= (x_l - x_j) / (x_i - x_j);
+            for (auto i = 0; i < N; i++) {
+                double x_i = nodalPoints[i];
+                L_il(i, l) = 1.0;
+                for (auto j = 0; j < N; j++) {
+                    if (i != j) {
+                        double x_j = nodalPoints[j];
+                        L_il(i,l) *= (x_l - x_j) / (x_i - x_j);
                     }
                 }
-                MatSetValue(L_il, i, l, entry_il, INSERT_VALUES);
-            }
+            } 
         }
-
-        MatAssemblyBegin(L_il, MAT_FINAL_ASSEMBLY);
-        MatAssemblyEnd(L_il, MAT_FINAL_ASSEMBLY);
         return L_il;
     }
 
-    std::pair<double, double> operator()(double x) {
-        double L_il = 1.0;
-        double dL_il = 0.0;
-        for (auto& x_i : quadraturePoints) {
-            L_il = 1.0;
-            dL_il = 0.0;
-            for (auto& x_j : quadraturePoints) {
-                double prod = 1.0;
-                if (x_i != x_j) {
-                    for (auto& x_k : quadraturePoints) {
-                        if (x_k != x_i && x_k != x_i) {
-                            prod *= (x - x_k) / (x_i - x_k);
+    Matrix<double> derivative(Vector<double> xSample) {
+        std::size_t Q = xSample.size();
+        std::size_t N = nodalPoints.size();
+        Matrix<double> dL_il(N, Q);
+        for (auto l = 0; l < Q; l++) {
+            double x_l = xSample[l];
+            for (auto i = 0; i < N; i++) {
+                double x_i = nodalPoints[i];
+                for (auto j = 0; j < N; j++) {
+                    double x_j = nodalPoints[j];
+                    double prod = 1.0;
+                    if (j != i) {
+                        for (auto k = 0; k < N; k++) {
+                            double x_k = nodalPoints[k];
+                            if (k != i && k != j) {
+                                prod *= (x_l - x_k) / (x_i - x_k);
+                            }
                         }
+                        dL_il(i,l) += prod / (x_i - x_j);
                     }
-                    L_il *= (x - x_j) / (x_i - x_j);
-                    dL_il += prod / (x_i - x_j);
                 }
             }
         }
-        return {L_il, dL_il};
-    }
-
-    std::pair<std::vector<double>, std::vector<double>> operator()(std::vector<double> x) {
-        std::vector<double> L_il, dL_il;
-        L_il.reserve(x.size());
-        dL_il.reserve(x.size());
-        for (auto& x_l : x) {
-            std::pair<double, double> L = operator()(x_l);
-            L_il.push_back(L.first);
-            dL_il.push_back(L.second);
-        }
-        return {L_il, dL_il};
+        return dL_il;
     }
 
 };

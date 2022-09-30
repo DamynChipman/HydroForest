@@ -29,8 +29,11 @@ public:
         double fLow = objectiveFunction(xLowerBound);
         double fHigh = objectiveFunction(xUpperBound);
         if ((fLow > 0.0 && fHigh > 0.0) || (fLow < 0.0 && fHigh < 0.0)) {
-            std::cerr << "[HydroForest::NewtonRaphsonSolver::solve] Root must be bracketed by `xLowerBound` and `xUpperBound`" << std::endl;
-            throw HydroForestException("Root must be bracketed by `xLowerBound` and `xUpperBound`");
+            std::string errorMessage = "[HydroForest::NewtonRaphsonSolver::solve] Root must be bracketed by `xLowerBound` and `xUpperBound`:\n";
+            errorMessage += "\txLowerBound = " + std::to_string(xLowerBound) + ", xUpperBound = " + std::to_string(xUpperBound) + "\n";
+            errorMessage += "\tfLow = " + std::to_string(fLow) + ", fHigh = " + std::to_string(fHigh) + "\n";
+            std::cerr << errorMessage << std::endl;
+            throw std::invalid_argument(errorMessage);
         }
 
         if (fLow == 0.0) { return xLowerBound; }
@@ -72,8 +75,12 @@ public:
                 xHigh = rts;
             }
         }
-        std::cerr << "[HydroForest::NewtonRaphsonSolver::solve] Maximum number of iterations reached in solve!" << std::endl;
-        throw HydroForestException("Maximum number of iterations reached in solve!");
+        std::string errorMessage = "[HydroForest::NewtonRaphsonSolver::solve] Maximum number of iterations reached in solve:\n";
+        errorMessage += "\tcurrent value = " + std::to_string(rts) + "\n";
+        errorMessage += "\tmaxIterations = " + std::to_string(maxIterations) + "\n";
+        errorMessage += "\ttolerance = " + std::to_string(tolerance) + "\n";
+        std::cerr << errorMessage << std::endl;
+        throw std::out_of_range(errorMessage);
     }
 
     double solve(double xGuess) {
@@ -88,8 +95,12 @@ public:
             }
             x_j = x_jp1;
         }
-        std::cerr << "[HydroForest::NewtonRaphsonSolver::solve] Maximum number of iterations reached in solve!" << std::endl;
-        throw HydroForestException("Maximum number of iterations reached in solve!");
+        std::string errorMessage = "[HydroForest::NewtonRaphsonSolver::solve] Maximum number of iterations reached in solve:\n";
+        errorMessage += "\tcurrent value = " + std::to_string(x_j) + "\n";
+        errorMessage += "\tmaxIterations = " + std::to_string(maxIterations) + "\n";
+        errorMessage += "\ttolerance = " + std::to_string(tolerance) + "\n";
+        std::cerr << errorMessage << std::endl;
+        throw std::out_of_range(errorMessage);
     }
 
 };

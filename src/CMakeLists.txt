@@ -36,6 +36,6 @@ target_link_directories(HydroForest PUBLIC
 )
 
 target_link_libraries(HydroForest PUBLIC
-    petsc sc p4est python3.9
+    petsc sc p4est python3.9 lapack blas
 )
 

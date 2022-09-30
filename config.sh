@@ -32,4 +32,4 @@ cmake ${HYDRO_FOREST} \
     -DPETSC_PATH=${PETSC_PATH} \
     -DP4EST_PATH=${P4EST_PATH}
 
-echo "Now cd to ${BUILD_DIR} and run make to compile"
+echo "Now cd to $(pwd)/${BUILD_DIR} and run make to compile"

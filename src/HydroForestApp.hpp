@@ -6,6 +6,7 @@
 #include "GenericSingleton.hpp"
 #include "Logger.hpp"
 #include "Options.hpp"
+#include "Memory.hpp"
 
 namespace HydroForest {
 

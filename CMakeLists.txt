@@ -9,7 +9,8 @@ add_subdirectory(external)
 add_subdirectory(src)
 
 # --=== HydroForest Test Suite ===--
-# add_subdirectory(test)
+add_subdirectory(test)
+enable_testing()
 
 # --=== HydroForest Examples and Math598 Projects ===--
 add_subdirectory(examples)
