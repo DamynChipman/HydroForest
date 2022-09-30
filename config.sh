@@ -2,7 +2,8 @@
 # HOME : Path to home directory
 HOME=/Users/damynchipman
 
-# PYTHON_ENV_PATH : Path to conda `HydroForest` envrionment directory
+# PYTHON_ENV_PATH : Path to conda `HydroForest` environment directory
+# NOTE: Also check ${HOME}/miniconda3 or ${HOME}/anaconda
 PYTHON_ENV_PATH=${HOME}/miniforge3/envs/HydroForest
 
 # PYTHON_VERSION : Version of Python in conda `HydroForest` envrionment
