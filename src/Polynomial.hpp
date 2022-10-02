@@ -22,31 +22,9 @@ namespace HydroForest {
  */
 struct LegendrePolynomial {
 
-    /**
-     * @brief Order of the polynomial
-     * 
-     */
     int order = 0;
-
-    /**
-     * @brief Construct a new Legendre Polynomial object
-     * 
-     */
-    LegendrePolynomial() {}
-
-    /**
-     * @brief Construct a new Legendre Polynomial object
-     * 
-     * @param order Order of the polynomial
-     */
     LegendrePolynomial(int order) : order(order) {}
 
-    /**
-     * @brief Computes the Legendre polynomial, it's first and second derivatives at the given point `x`
-     * 
-     * @param x Point to evaluate
-     * @return std::vector<double> {l0, l0_1, l0_2} where `_n` denotes the n-th derivative
-     */
     double operator()(double x) {
         double l1 = 0.0;
         double l0 = 1.0;
@@ -61,15 +39,15 @@ struct LegendrePolynomial {
         return l0;
     }
 
-    std::vector<double> operator()(std::vector<double> x) {
-        std::vector<double> f(x.size());
+    Vector<double> operator()(Vector<double> x) {
+        Vector<double> f(x.size());
         for (int l = 0; l < x.size(); l++) {
             f[l] = operator()(x[l]);
         }
         return f;
     }
 
-    std::vector<double> evalD012(double x) {
+    Vector<double> derivatives012(double x) {
         double l1 = 0.0; double l1_1 = 0.0; double l1_2 = 0.0;
         double l0 = 1.0; double l0_1 = 0.0; double l0_2 = 0.0;
         for (int i = 1; i <= order; i++) {

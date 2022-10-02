@@ -152,7 +152,7 @@ public:
         }
 
         double objectiveDerivative(double x) {
-            return this->actualClass.poly.evalD012(x)[1];
+            return this->actualClass.poly.derivatives012(x)[1];
         }
 
     };
@@ -165,7 +165,7 @@ public:
         for (int i = 0; i < points_.size(); i++) {
             points_[i] = solver.solve(chebyGrid.getPoints()[i]);
             
-            double dPhi = poly.evalD012(points_[i])[1];
+            double dPhi = poly.derivatives012(points_[i])[1];
             weights_[i] = (2.0) / ((1.0 - pow(points_[i],2)) * pow(dPhi, 2));
         }
 
@@ -198,12 +198,12 @@ public:
         RootSolver(LobattoGrid1D& actualClass) : NewtonRaphsonSolver<LobattoGrid1D>(actualClass) {}
 
         double objectiveFunction(double x) {
-            std::vector<double> phiLegendreValues = this->actualClass.poly.evalD012(x);
+            Vector<double> phiLegendreValues = this->actualClass.poly.derivatives012(x);
             return (1.0 - pow(x,2))*phiLegendreValues[1];
         }
 
         double objectiveDerivative(double x) {
-            std::vector<double> phiLegendreValues = this->actualClass.poly.evalD012(x);
+            Vector<double> phiLegendreValues = this->actualClass.poly.derivatives012(x);
             return -2.0*x*phiLegendreValues[1] + (1.0 - pow(x,2))*phiLegendreValues[2];
         }
 

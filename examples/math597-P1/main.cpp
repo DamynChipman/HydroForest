@@ -21,55 +21,76 @@ static auto df = [](double x) { return -(M_PI/2.0)*sin((M_PI/2.0)*x); };
 static double fIntegral = 4.0 / M_PI;
 
 void runDemonstration() {
+    // -----====================-----
+    // Demo 1 : Show interpolation results
+    // -----====================-----
+
     // Create plotting grid and sample function at points
     double xLower = -1;
     double xUpper = 1;
-    int nPlot = 50;
+    int nPlot = 400;
     HydroForest::UniformGrid1D<double> plotGrid(xLower, xUpper, nPlot);
     HydroForest::Vector<double> samplePoints = plotGrid.getPoints();
     HydroForest::Vector<double> fSample(nPlot);
-    HydroForest::Vector<double> dfSample(nPlot);
     for (auto i = 0; i < nPlot; i++) {
         fSample[i] = f(samplePoints[i]);
     }
     plt::plot(samplePoints.data(), fSample.data(), "-r");
 
     // Create basis points
-    int basisOrder = 4;
+    int basisOrder = 64;
     HydroForest::UniformGrid1D<double> uniformBasis(xLower, xUpper, basisOrder);
     HydroForest::ChebyshevGrid1D<double> chebyshevBasis(basisOrder);
     HydroForest::LegendreGrid1D<double> legendreBasis(basisOrder);
     HydroForest::LobattoGrid1D<double> lobattoBasis(basisOrder);
-    std::vector<HydroForest::Grid1DBase<double>*> basisPoints(4);
-    basisPoints[0] = &uniformBasis;
-    basisPoints[1] = &chebyshevBasis;
-    basisPoints[2] = &legendreBasis;
-    basisPoints[3] = &lobattoBasis;
 
-    // Iterate through basis functions
-    // [uniform, chebyshev, legendre, lobatto]
-    for (auto basisIndex = 0; basisIndex < basisPoints.size(); basisIndex++) {
-        auto& basisPointGrid = *basisPoints[basisIndex];
+    // Create Lagrange nodal points and interpolation matrix
+    HydroForest::Vector<double> nodalPoints = uniformBasis.getPoints();
+    HydroForest::LagrangePolynomial lagrangePolyBasis(nodalPoints);
+    HydroForest::Matrix<double> L_ik = lagrangePolyBasis(samplePoints);
+    HydroForest::Matrix<double> L_ki = L_ik.T(); // Transpose for inner product
 
-        // Create Lagrange nodal points and interpolation matrix
-        HydroForest::Vector<double> nodalPoints = basisPointGrid.getPoints();
-        HydroForest::LagrangePolynomial lagrangePolyBasis(nodalPoints);
-        HydroForest::Matrix<double> L_ik = lagrangePolyBasis(samplePoints);
-        HydroForest::Matrix<double> L_ki = L_ik.T(); // Transpose for inner product
-
-        HydroForest::Vector<double> fNodal(nodalPoints.size());
-        for (auto i = 0; i < fNodal.size(); i++) {
-            fNodal[i] = f(nodalPoints[i]);
-        }
-        HydroForest::Vector<double> fInterpolated = L_ki * fNodal; // f_i = L_ki * f_k
-
-        plt::plot(samplePoints.data(), fInterpolated.data(), "*-");
+    HydroForest::Vector<double> fNodal(nodalPoints.size());
+    for (auto i = 0; i < fNodal.size(); i++) {
+        fNodal[i] = f(nodalPoints[i]);
     }
+    HydroForest::Vector<double> fInterpolated = L_ki * fNodal; // f_i = L_ki * f_k
 
-    plt::title("Interpolation with Various Basis Functions");
+    plt::plot(samplePoints.data(), fInterpolated.data(), "--");
+    plt::title("Interpolation with Uniform Basis Points - N = " + std::to_string(basisOrder));
     plt::xlabel("x");
     plt::ylabel("f(x)");
+    plt::save("interpolation_example.pdf");
     plt::show();
+
+    // -----====================-----
+    // Demo 2 : Plot Lagrange polynomials at nodal basis points
+    // -----====================-----
+
+    // Create basis points and Lagrange polynomial and matrix
+    HydroForest::LobattoGrid1D<double> nodalPointsBasis(basisOrder);
+    HydroForest::LagrangePolynomial L(nodalPointsBasis.getPoints());
+    HydroForest::Matrix<double> L_il = L(plotGrid.getPoints());
+
+    // Get each of the Lagrange polynomials
+    std::vector<HydroForest::Vector<double>> lagrangePolys;
+    for (auto i = 0; i < basisOrder+1; i++) {
+        HydroForest::Vector<double> L_i = L_il.getRow(i);
+        lagrangePolys.push_back(L_i);
+    }
+
+    // Plot each of the Lagrange polynomials across whole domain/element
+    for (int i = 0; i < basisOrder+1; i++) {
+        HydroForest::Vector<double> L_i = lagrangePolys[i];
+        plt::plot(plotGrid.getPoints().data(), L_i.data(), {{"label", std::to_string(i)}});
+    }
+    plt::plot(nodalPointsBasis.getPoints().data(), std::vector<double>(nodalPointsBasis.getNPoints(), 0), ".k");
+    plt::title("Lagrange Polynomial Basis Functions - P = " + std::to_string(basisOrder));
+    plt::legend();
+    plt::save("lagrange_basis_functions.pdf");
+    plt::show();
+
+    return;
 }
 
 void runProblem1() {

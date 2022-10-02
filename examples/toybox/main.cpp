@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     int nPlot = 400;
     HydroForest::UniformGrid1D<double> plotGrid(-1.0, 1.0, nPlot);
 
-    int basisOrder = 2;
+    int basisOrder = 4;
     HydroForest::LobattoGrid1D<double> basisPoints(basisOrder);
     HydroForest::LagrangePolynomial L(basisPoints.getPoints());
     HydroForest::Matrix<double> L_il = L(plotGrid.getPoints());
