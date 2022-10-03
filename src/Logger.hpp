@@ -8,11 +8,31 @@
 
 namespace HydroForest {
 
+/**
+ * @brief Struct to control output of messages to the console or a file
+ * 
+ */
 struct Logger {
 
+    /**
+     * @brief Construct a new Logger object
+     * 
+     */
     Logger() {}
+
+    /**
+     * @brief Destroy the Logger object
+     * 
+     */
     ~Logger() {}
 
+    /**
+     * @brief Prints a message to the console with optional formatting for `printf`
+     * 
+     * @tparam Args 
+     * @param message The message to log
+     * @param args Additional arguments to pass to `printf` for formatting
+     */
     template<class... Args>
     void log(std::string message, Args... args) {
         int myRank = -1;

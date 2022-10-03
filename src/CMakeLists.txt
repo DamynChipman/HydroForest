@@ -6,7 +6,6 @@ add_library(HydroForest)
 set_target_properties(HydroForest PROPERTIES EXPORT_NAME HydroForest)
 
 set(HYDRO_FOREST_SOURCE_FILES
-    Options.cpp
     VTKBuilder.cpp
 )
 

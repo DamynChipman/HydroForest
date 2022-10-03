@@ -20,18 +20,49 @@ public:
     // Constructors
     // ---======---
 
+    /**
+     * @brief Default constructor sets size and data to zero
+     * 
+     */
     Vector() : size_(0), data_(0) {}
     
+    /**
+     * @brief Create vector with size
+     * 
+     * @param size Size of vector
+     */
     Vector(std::size_t size) : size_(size), data_(size) {}
 
+    /**
+     * @brief Create a vector and assign it to already allocated memory array
+     * 
+     * @param size Size of vector
+     * @param dataArray Pointer of beginning of memory block
+     */
     Vector(std::size_t size, NumericalType* dataArray) : size_(size) {
         data_.assign(dataArray, dataArray + size);
     }
 
+    /**
+     * @brief Create a vector of a given size, setting all elements to `value`
+     * 
+     * @param size Size of vector
+     * @param value Value of data entries
+     */
     Vector(std::size_t size, NumericalType value) : size_(size), data_(size, value) {}
 
+    /**
+     * @brief Create a vector from an initialization list
+     * 
+     * @param iList The initialization list
+     */
     Vector(std::initializer_list<NumericalType> iList) : size_(iList.size()), data_(iList) {}
 
+    /**
+     * @brief Copy constructor
+     * 
+     * @param v 
+     */
     Vector(const Vector& v) {
         std::size_t sizeCopy = v.size();
         std::vector<NumericalType> dataCopy = v.data();
@@ -47,6 +78,15 @@ public:
     // "Getter" and "Setter" functions
     // ---=========================---
 
+    /**
+     * @brief Get an entry in the vector
+     * 
+     * @sa operator[]
+     * @sa operator()
+     *  
+     * @param index Index of entry
+     * @return NumericalType Value of entry
+     */
     NumericalType getEntry(std::size_t index) {
         if (index > size_ || index < 0) {
             std::string errorMessage = "[HydroForest::Vector::getEntry] `index` is out of range:\n";
@@ -58,6 +98,15 @@ public:
         return data_[index];
     }
 
+    /**
+     * @brief Index into the vector
+     * 
+     * @sa getEntry
+     * @sa operator()
+     * 
+     * @param index Index of entry
+     * @return NumericalType& Reference to value in vector
+     */
     NumericalType& operator[](std::size_t index) {
         if (index > size_ || index < 0) {
             std::string errorMessage = "[HydroForest::Vector::operator[]] `index` is out of range:\n";
@@ -69,6 +118,15 @@ public:
         return data_[index];
     }
 
+    /**
+     * @brief Index into vector
+     * 
+     * @sa getEntry
+     * @sa operator[]
+     * 
+     * @param index Index of entry
+     * @return NumericalType& Reference to value in vector
+     */
     NumericalType& operator()(std::size_t index) {
         if (index > size_ || index < 0) {
             std::string errorMessage = "[HydroForest::Vector::operator()] `index` is out of range:\n";
@@ -84,10 +142,36 @@ public:
     // "Getter" functions
     // ---============---
 
+    /**
+     * @brief Return the size of vector
+     * 
+     * @return std::size_t Size of vector
+     */
     std::size_t size() const { return size_; }
+
+    /**
+     * @brief Return the std::vector of the data
+     * 
+     * @return std::vector<NumericalType> Data
+     */
     std::vector<NumericalType> data() const { return data_; }
+
+    /**
+     * @brief Return the pointer of the data array of the std::vector
+     * 
+     * @return NumericalType* Pointer to data array
+     */
     NumericalType* dataPointer() { return data_.data(); }
 
+    /**
+     * @brief Create a new vector of the entries in the range (inclusive)
+     * 
+     * @sa operator()
+     * 
+     * @param a Start of entries
+     * @param b End of entries
+     * @return Vector<NumericalType> Vector of size `(b - a) + 1` with entries
+     */
     Vector<NumericalType> getRange(std::size_t a, std::size_t b) {
         if (a > size_ || b > size_ || a < 0 || b < 0) {
             std::string errorMessage = "[HydroForest::Vector::getRange] `a` or `b` is outside of range of vector:\n";
@@ -105,6 +189,15 @@ public:
         return v;
     }
 
+    /**
+     * @brief Create a new vector of the entries in the range (inclusive)
+     * 
+     * @sa getRange
+     * 
+     * @param a Start of entries
+     * @param b End of entries
+     * @return Vector<NumericalType> Vector of size `(b - a) + 1` with entries
+     */
     Vector<NumericalType> operator()(std::size_t a, std::size_t b) {
         if (a > size_ || b > size_ || a < 0 || b < 0) {
             std::string errorMessage = "[HydroForest::Vector::operator()] `a` or `b` is outside of range of vector:\n";
@@ -122,6 +215,14 @@ public:
         return v;
     }
 
+    /**
+     * @brief Create a new vector from an index set
+     * 
+     * @sa operator()
+     * 
+     * @param I The index set of indices
+     * @return Vector<NumericalType> Vector of size `I.size()` with entries from index set
+     */
     Vector<NumericalType> getFromIndexSet(Vector<int> I) {
         if (I.size() > size_) {
             std::string errorMessage = "[HydroForest::Vector::operator()] `Size of index set `I` is greater than size of vector:\n";
@@ -146,6 +247,14 @@ public:
         return res;
     }
 
+    /**
+     * @brief Create a new vector from an index set
+     * 
+     * @sa getFromIndexSet
+     * 
+     * @param I The index set of indices
+     * @return Vector<NumericalType> Vector of size `I.size()` with entries from index set
+     */
     Vector<NumericalType> operator()(Vector<int> I) {
         if (I.size() > size_) {
             std::string errorMessage = "[HydroForest::Vector::operator()] `Size of index set `I` is greater than size of vector:\n";

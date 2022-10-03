@@ -10,38 +10,64 @@
 
 namespace HydroForest {
 
-class HydroForestException : public std::exception {
-
-public:
-
-    explicit HydroForestException(const char* message) : message_(message) {}
-    explicit HydroForestException(const std::string message) : message_(message) {}
-    virtual ~HydroForestException() noexcept {}
-
-    virtual const char* what() const noexcept {
-        std::string w = "[HydroForest Exception] " + message_;
-        return w.c_str();
-    }
-
-private:
-
-    std::string message_;
-
-};
-
+/**
+ * @brief Single instance of the HydroFoest app
+ * 
+ * The user will create an instance of the HydroForest within the `main` function. It is derived
+ * from a generic singleton design, meaning there is only one instance. At initialization, any
+ * dependencies are initialized and the command line arguments are parsed and any HydroForest
+ * options are stored in the `Options` class.
+ * 
+ */
 class HydroForestApp : public GenericSingleton<HydroForestApp> {
 
 private:
 
+    /**
+     * @brief Address of command line arguments `argc`
+     * 
+     */
     int* argc_;
+
+    /**
+     * @brief Address of command line arguments `argv`
+     * 
+     */
     char*** argv_;
+
+    /**
+     * @brief Logger instance for logging during app
+     * 
+     */
     Logger logger_;
+
+    /**
+     * @brief Options instance for storing and setting options
+     * 
+     */
     Options options_;
 
 public:
 
+    /**
+     * @brief Construct a new Hydro Forest App object
+     * 
+     * Default constructor; sets pointers to `nullptr`. The other constructor should be used
+     * instead.
+     * 
+     */
     HydroForestApp() : argc_(nullptr), argv_(nullptr) {}
     
+    /**
+     * @brief Construct a new Hydro Forest App object from the command line arguments
+     * 
+     * Also initializes any dependencies:
+     *      MPI
+     *      PETSc
+     * 
+     * @param argc 
+     * @param argv 
+     */
     HydroForestApp(int* argc, char*** argv) : argc_(argc), argv_(argv) {
         MPI_Init(argc_, argv_);
         PetscInitialize(argc_, argv_, NULL, NULL);
@@ -55,6 +81,10 @@ public:
 
     }
 
+    /**
+     * @brief Destroy the Hydro Forest App object
+     * 
+     */
     ~HydroForestApp() {
         int myRank = -1;
         MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
@@ -65,18 +95,47 @@ public:
         MPI_Finalize();
     }
 
+    /**
+     * @brief Get the command line arguments `argc`
+     * 
+     * @return int* 
+     */
     int* getArgc() const { return argc_; }
+
+    /**
+     * @brief Get the command line arguments `argv`
+     * 
+     * @return char*** 
+     */
     char*** getArgv() const { return argv_; }
+
+    /**
+     * @brief Get the Logger instance
+     * 
+     * @return Logger& 
+     */
     Logger& getLogger() { return logger_; }
+
+    /**
+     * @brief Get the Options instance
+     * 
+     * @return Options& 
+     */
     Options& getOptions() { return options_; }
 
+    /**
+     * @brief Wrapper for `Logger.log()`
+     * 
+     * @tparam Args 
+     * @param message The message to log
+     * @param args Additional arguments to pass to `printf` for formatting
+     */
     template<class... Args>
     void log(std::string message, Args... args) {
         logger_.log(message, args...);
     }
 
 };
-
 
 } // NAMESPACE: HydroForest
 
