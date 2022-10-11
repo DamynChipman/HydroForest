@@ -63,11 +63,28 @@ public:
      * 
      * @param v 
      */
+    Vector(Vector& v) {
+        std::size_t sizeCopy = v.size();
+        std::vector<NumericalType> dataCopy = v.data();
+        size_ = sizeCopy;
+        data_ = dataCopy;
+    }
+    
+    /**
+     * @brief Copy constructor
+     * 
+     * @param v 
+     */
     Vector(const Vector& v) {
         std::size_t sizeCopy = v.size();
         std::vector<NumericalType> dataCopy = v.data();
         size_ = sizeCopy;
         data_ = dataCopy;
+    }
+
+    Vector<NumericalType>& operator=(const Vector<NumericalType>& rhs) {
+        Vector<NumericalType> res(rhs);
+        return res;
     }
 
     // Vector(Vector&& v) {
@@ -108,6 +125,26 @@ public:
      * @return NumericalType& Reference to value in vector
      */
     NumericalType& operator[](std::size_t index) {
+        if (index > size_ || index < 0) {
+            std::string errorMessage = "[HydroForest::Vector::operator[]] `index` is out of range:\n";
+            errorMessage += "\tindex = " + std::to_string(index) + "\n";
+            errorMessage += "\tsize = " + std::to_string(size_) + "\n";
+            std::cerr << errorMessage << std::endl;
+            throw std::out_of_range(errorMessage);
+        }
+        return data_[index];
+    }
+
+    /**
+     * @brief Index into the vector
+     * 
+     * @sa getEntry
+     * @sa operator()
+     * 
+     * @param index Index of entry
+     * @return NumericalType& Reference to value in vector
+     */
+    const NumericalType& operator[](std::size_t index) const {
         if (index > size_ || index < 0) {
             std::string errorMessage = "[HydroForest::Vector::operator[]] `index` is out of range:\n";
             errorMessage += "\tindex = " + std::to_string(index) + "\n";
@@ -431,6 +468,24 @@ Vector<int> vectorRange(std::size_t start, std::size_t end) {
     }
     return res;
 }
+
+template<typename NumericalType>
+Vector<NumericalType> operator*(NumericalType lhs, Vector<NumericalType> rhs) {
+    Vector<NumericalType> res(rhs.size());
+    for (auto i = 0; i < res.size(); i++) {
+        res[i] = lhs * rhs[i];
+    }
+    return res;
+}
+
+// template<typename NumericalType>
+// Vector<NumericalType> operator*(NumericalType lhs, Vector<NumericalType> rhs) {
+//     Vector<NumericalType> res(rhs.size());
+//     for (auto i = 0; i < res.size(); i++) {
+//         res[i] = lhs * rhs[i];
+//     }
+//     return res;
+// }
  
 } // NAMESPACE : HydroForest
 

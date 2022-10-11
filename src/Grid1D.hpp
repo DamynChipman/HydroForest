@@ -4,6 +4,8 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
+#include <iostream>
 
 #include "Vector.hpp"
 #include "Polynomial.hpp"
@@ -23,6 +25,19 @@ public:
     virtual FloatingDataType getLowerBound() = 0;
     virtual FloatingDataType getUpperBound() = 0;
     virtual FloatingDataType operator[](std::size_t index) = 0;
+
+    friend std::ostream& operator<<(std::ostream& os, Grid1DBase& grid) {
+        os << "--- Grid ---" << std::endl;
+        os << "Lower Bound = " << grid.getLowerBound() << std::endl;
+        os << "Upper Bound = " << grid.getUpperBound() << std::endl;
+        os << "# of Points = " << grid.getNPoints() << std::endl;
+        for (auto i = 0; i < grid.getPoints().size(); i++) {
+            os << std::setprecision(4) << std::setw(8) << grid.operator[](i);
+            if (i % 10 == 9) os << std::endl;
+        }
+        os << std::endl;
+        return os;
+    }
 
 };
 

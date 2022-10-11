@@ -22,7 +22,7 @@ namespace HydroForest {
  */
 struct LegendrePolynomial {
 
-    int order = 0;
+    std::size_t order = 0;
     LegendrePolynomial(int order) : order(order) {}
 
     double operator()(double x) {

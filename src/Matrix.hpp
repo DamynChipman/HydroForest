@@ -2,6 +2,9 @@
 #define MATRIX_HPP_
 
 #include <string>
+#include <algorithm>
+#include <iomanip>
+#include <iostream>
 
 #include "Vector.hpp"
 
@@ -28,9 +31,9 @@ public:
 
     Matrix(std::size_t nRows, std::size_t nCols) : nRows_(nRows), nCols_(nCols), data_(nRows * nCols) {}
 
-    Matrix(std::size_t nRows, std::size_t nCols, NumericalType* dataArray) : nRows_(nRows), nCols_(nCols) {
-        data_.assign(dataArray, dataArray + (nCols * nRows));
-    }
+    // Matrix(std::size_t nRows, std::size_t nCols, NumericalType* dataArray) : nRows_(nRows), nCols_(nCols) {
+    //     data_.assign(dataArray, dataArray + (nCols * nRows));
+    // }
 
     Matrix(std::size_t nRows, std::size_t nCols, NumericalType value) : nRows_(nRows), nCols_(nCols), data_(nRows * nCols, value) {}
 
@@ -93,6 +96,30 @@ public:
         return res;
     }
 
+    friend std::ostream& operator<<(std::ostream& os, Matrix<NumericalType>& A) {
+        os << "  [" << A.nRows() << " x " << A.nCols() << "]  " << std::endl;
+        for (auto i = 0; i < A.nRows(); i++) {
+            for (auto j = 0; j < A.nCols(); j++) {
+                os << std::setprecision(4) << std::setw(10) << A(i,j);
+            }
+            os << std::endl;
+        }
+        return os;
+    }
+
+    Matrix<NumericalType>& operator*=(NumericalType rhs) {
+        for (auto i = 0; i < nRows_; i++) {
+            for (auto j = 0; j < nCols_; j++) {
+                operator()(i, j) *= rhs;
+            }
+        }
+        return *this;
+    }
+
+    // Matrix<NumericalType>& operator*(NumericalType rhs) {
+    //     return *this *= rhs;
+    // }
+
 private:
 
     std::size_t flattenIndex_(std::size_t i, std::size_t j) {
@@ -114,6 +141,17 @@ private:
     }
 
 };
+
+template<typename NumericalType>
+Matrix<NumericalType> operator*(NumericalType a, Matrix<NumericalType>& A) {
+    Matrix<NumericalType> res(A.nRows(), A.nCols());
+    for (auto i = 0; i < res.nRows(); i++) {
+        for (auto j = 0; j < res.nCols(); j++) {
+            res(i,j) = a * A(i,j);
+        }
+    }
+    return res;
+}
 
 Vector<double> operator*(Matrix<double>& A, Vector<double>& x) {
     if (A.nCols() != x.size()) {
