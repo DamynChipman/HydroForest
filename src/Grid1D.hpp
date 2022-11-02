@@ -27,7 +27,7 @@ public:
     virtual FloatingDataType operator[](std::size_t index) = 0;
 
     friend std::ostream& operator<<(std::ostream& os, Grid1DBase& grid) {
-        os << "--- Grid ---" << std::endl;
+        // os << "--- Grid ---" << std::endl;
         os << "Lower Bound = " << grid.getLowerBound() << std::endl;
         os << "Upper Bound = " << grid.getUpperBound() << std::endl;
         os << "# of Points = " << grid.getNPoints() << std::endl;
@@ -121,12 +121,13 @@ public:
     ChebyshevGrid1D(std::size_t order) : order_(order), points_(order+1), weights_(order+1) {
 
         for (int i = 0; i <= order; i++) {
-            points_[i] = cos((2.0*i + 1.0)/(2.0*order + 2.0) * M_PI);
+            int index = order - i;
+            points_[index] = cos((2.0*i + 1.0)/(2.0*order + 2.0) * M_PI);
             weights_[i] = (M_PI) / (order + 1.0);
         }
 
-        // std::sort(points_.data().begin(), points_.data().end());
-        // std::sort(weights_.data().begin(), weights_.data().end());
+        // std::sort(points_.data().begin(), points_.data().end(), std::greater<FloatingDataType>{});
+        // std::sort(weights_.data().begin(), weights_.data().end(), std::greater<FloatingDataType>{});
 
     }
 

@@ -28,14 +28,18 @@ public:
      * @brief Construct a new Options object
      * 
      */
-    Options() {}
+    Options() {
+        setDefaultOptions_();
+    }
 
     /**
      * @brief Construct a new Options object from an already built map
      * 
      * @param map 
      */
-    Options(std::map<std::string, OptionTypes> map) : optionsMap_(map) {}
+    Options(std::map<std::string, OptionTypes> map) : optionsMap_(map) {
+        setDefaultOptions_();
+    }
 
     /**
      * @brief Index into options map to get or set option
@@ -73,6 +77,15 @@ public:
                 {os << v << std::endl; }, value);
         }
         return os;
+    }
+
+protected:
+
+    void setDefaultOptions_() {
+        optionsMap_["scheme"] = "CG";
+        optionsMap_["integration"] = "exact";
+        optionsMap_["nodal-grid-type"] = "Lobatto";
+        optionsMap_["quadrature-grid-type"] = "Lobatto";
     }
 
 private:

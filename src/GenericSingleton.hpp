@@ -13,7 +13,6 @@ public:
 
     static ActualClass& getInstance() {
         std::lock_guard<std::mutex> lock(mutex_);
-        std::cout << "actualClassPointer_ = " << actualClassPointer_ << std::endl;
         if (actualClassPointer_ == nullptr) {
             actualClassPointer_ = new ActualClass;
         }
