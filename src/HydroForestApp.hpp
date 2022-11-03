@@ -21,7 +21,7 @@ namespace HydroForest {
  */
 class HydroForestApp : public GenericSingleton<HydroForestApp> {
 
-private:
+protected:
 
     /**
      * @brief Address of command line arguments `argc`
@@ -79,6 +79,9 @@ public:
         }
         this->actualClassPointer_ = this;
 
+        // Set options from command line
+        setCMLOptions_();
+
     }
 
     /**
@@ -133,6 +136,13 @@ public:
     template<class... Args>
     void log(std::string message, Args... args) {
         logger_.log(message, args...);
+    }
+
+private:
+
+    void setCMLOptions_() {
+        // Loop through argv
+
     }
 
 };

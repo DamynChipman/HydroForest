@@ -113,7 +113,6 @@ public:
 
     }
 
-
 };
 
 template<typename NumericalType>
