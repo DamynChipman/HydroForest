@@ -166,18 +166,6 @@ protected:
 
 // }
 
-// template<typename FloatingDataType>
-// std::vector<Element1D<FloatingDataType>> createElementGrid(UniformGrid1D<FloatingDataType>& elementGrid, Grid1DBase<FloatingDataType>& basisGrid, Grid1DBase<FloatingDataType>& quadratureGrid) {
-    
-//     std::size_t nElements = elementGrid.getNPoints();
-//     std::vector<Element1D<FloatingDataType>> elements;
-//     for (auto e = 0; e < nElements; e++) {
-//         elements.push_back(Element1D<FloatingDataType>(basisGrid, quadratureGrid));
-//     }
-//     return elements;
-
-// }
-
 } // NAMESPACE : HydroForest
 
 #endif // ELEMENT_1D_HPP_

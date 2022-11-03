@@ -17,10 +17,6 @@ public:
     CGMassMatrix(LagrangePolynomial& basisFunctionPoly, Grid1DBase<NumericalType>& nodalPointGrid, Grid1DBase<NumericalType>& quadraturePointGrid) :
         Matrix<NumericalType>(basisFunctionPoly.order, basisFunctionPoly.order, 0) {
 
-        // for (auto& i : this->data_) {
-        //     i = 0;
-        // }
-
         Matrix<NumericalType> L_ik = basisFunctionPoly(quadraturePointGrid.getPoints());
         Matrix<NumericalType> L_jk = basisFunctionPoly(quadraturePointGrid.getPoints());
 
@@ -47,8 +43,6 @@ public:
     CGDerivativeMatrix(LagrangePolynomial& basisFunctionPoly, Grid1DBase<NumericalType>& nodalPointGrid, Grid1DBase<NumericalType>& quadraturePointGrid) :
         Matrix<NumericalType>(basisFunctionPoly.order, basisFunctionPoly.order, 0) {
 
-        // for (auto& i : this->data_) i = 0;
-
         Matrix<NumericalType> L_ik = basisFunctionPoly(quadraturePointGrid.getPoints());
         Matrix<NumericalType> dL_jk = basisFunctionPoly.derivative(quadraturePointGrid.getPoints());
 
@@ -73,8 +67,6 @@ public:
 
     CGIDMatrix(std::size_t nOrder, std::size_t nElements) :
         Matrix<int>(nOrder + 1, nElements, 0) {
-
-        // for (auto& i : this->data_) i = 0;
 
         int ID_ij = 0;
         for (auto e = 0; e < nElements; e++) {
@@ -251,121 +243,6 @@ struct CGDirectStiffnessSummationOperator {
     }
 
 };
-
-// template<typename NumericalType>
-// Matrix<NumericalType> directStiffnessSummationWithMetricTerm(std::vector<Element1D<NumericalType>>& elements, Matrix<int>& IDMatrix, Matrix<NumericalType>& elementMatrix) {
-    
-//     int nElements = (int) elements.size();
-//     int nOrder = (int) IDMatrix.nRows() - 1;
-//     int nPoints = nElements * nOrder + 1;
-
-//     Matrix<NumericalType> M(nPoints, nPoints, 0);
-
-//     for (auto e = 0; e < nElements; e++) {
-//         double dx = elements[e].xUpper() - elements[e].xLower();
-//         for (auto j = 0; j < nOrder + 1; j++) {
-//             int J = IDMatrix(j, e);
-//             for (auto i = 0; i < nOrder + 1; i++) {
-//                 int I = IDMatrix(i, e);
-//                 M(I,J) += (dx/2.0)*elementMatrix(i,j);
-//             }
-//         }
-//     }
-
-//     return M;
-
-// }
-
-// template<typename NumericalType>
-// Matrix<NumericalType> directStiffnessSummation(std::vector<Element1D<NumericalType>>& elements, Matrix<int>& IDMatrix, Matrix<NumericalType>& elementMatrix) {
-    
-//     int nElements = (int) elements.size();
-//     int nOrder = (int) IDMatrix.nRows() - 1;
-//     int nPoints = nElements * nOrder + 1;
-
-//     Matrix<NumericalType> M(nPoints, nPoints, 0);
-
-//     for (auto e = 0; e < nElements; e++) {
-//         for (auto j = 0; j < nOrder + 1; j++) {
-//             int J = IDMatrix(j, e);
-//             for (auto i = 0; i < nOrder + 1; i++) {
-//                 int I = IDMatrix(i, e);
-//                 M(I,J) += elementMatrix(i,j);
-//             }
-//         }
-//     }
-
-//     return M;
-
-// }
-
-// template<typename NumericalType>
-// Matrix<NumericalType> directStiffnessSummationMatrix(std::vector<Element1D<NumericalType>>& elements, Matrix<int>& IDMatrix, std::string matrixName) {
-    
-//     int nElements = (int) elements.size();
-//     int nOrder = (int) IDMatrix.nRows() - 1;
-//     int nPoints = nElements * nOrder + 1;
-
-//     Matrix<NumericalType> M(nPoints, nPoints, 0);
-
-//     for (auto e = 0; e < nElements; e++) {
-//         double dx = elements[e].grid()->getUpperBound() - elements[e].grid()->getLowerBound();
-//         for (auto j = 0; j < nOrder + 1; j++) {
-//             int J = IDMatrix(j, e);
-//             for (auto i = 0; i < nOrder + 1; i++) {
-//                 int I = IDMatrix(i, e);
-//                 M(I,J) += (dx/2.0)*elements[e].matrices()[matrixName](i,j);
-//             }
-//         }
-//     }
-
-//     return M;
-
-// }
-
-// template<typename NumericalType>
-// Vector<NumericalType> directStiffnessSummation(std::vector<Element1D<NumericalType>>& elements, Matrix<int>& IDMatrix, Vector<NumericalType>& elementVector) {
-
-//     int nElements = (int) elements.size();
-//     int nOrder = (int) IDMatrix.nRows() - 1;
-//     int nPoints = nElements * nOrder + 1;
-
-//     Vector<NumericalType> r(nPoints, 0);
-
-//     for (auto e = 0; e < nElements; e++) {
-//         double dx = elements[e].grid()->getUpperBound() - elements[e].grid()->getLowerBound();
-//         for (auto i = 0; i < nOrder; i++) {
-//             int I = IDMatrix(i,e);
-//             r[I] += elementVector[i];
-//         }
-//     }
-
-//     return r;
-
-// }
-
-// template<typename NumericalType>
-// Vector<NumericalType> directStiffnessSummationVector(std::vector<Element1D<NumericalType>>& elements, Matrix<int>& IDMatrix, std::string vectorName) {
-
-//     int nElements = (int) elements.size();
-//     int nOrder = (int) IDMatrix.nRows() - 1;
-//     int nPoints = nElements * nOrder + 1;
-
-//     Vector<NumericalType> r(nPoints, 0);
-
-//     for (auto e = 0; e < nElements; e++) {
-//         double dx = elements[e].grid()->getUpperBound() - elements[e].grid()->getLowerBound();
-//         for (auto i = 0; i < nOrder; i++) {
-//             int I = IDMatrix(i,e);
-//             r[I] += elements[e].vectors()[vectorName][i];
-//         }
-//     }
-
-//     return r;
-
-// }
-
-
 
 } // NAMESPACE : HydroForest
 
