@@ -9,6 +9,13 @@ namespace plt = matplotlibcpp;
 
 namespace HydroForest {
 
+enum BoundaryConditionType {
+    Dirichlet,
+    Neumann,
+    Mixed,
+    Periodic
+};
+
 template<typename FloatingDataType>
 class Mesh1DBase {
 
@@ -81,17 +88,34 @@ public:
     }
 
     void plot(std::string format) {
+        bool doName = true;
         for (auto& e : elements_) {
             std::vector<FloatingDataType> x = e.grid()->getPoints().data();
             std::vector<FloatingDataType> y = e.solution().data();
             for (auto i = 0; i < e.size(); i++) {
                 x[i] = e.transformLocal2Global(x[i]);
             }
-            plt::plot(x, y, format);
+            if (doName) {
+                plt::named_plot("Solution", x, y, format);
+                doName = false;
+            }
+            else {
+                plt::plot(x, y, format);
+            }
 
         }
+        doName = true;
         for (auto& e : elements_) {
-            plt::plot({e.xLower(), e.xUpper()}, {0, 0}, "|-k");
+            std::vector<FloatingDataType> x = {e.xLower(), e.xUpper()};
+            std::vector<FloatingDataType> y(2, 0);
+            if (doName) {
+                plt::named_plot("Mesh", x, y, "|-k");
+                doName = false;
+            }
+            else {
+                plt::plot(x, y, "|-k");
+            }
+
         }
     }
 

@@ -61,6 +61,32 @@ public:
 
 };
 
+template<typename NumericalType>
+class CGLaplacianMatrix : public Matrix<NumericalType> {
+
+public:
+
+    CGLaplacianMatrix(LagrangePolynomial& basisFunctionPoly, Grid1DBase<NumericalType>& nodalPointGrid, Grid1DBase<NumericalType>& quadraturePointGrid) :
+        Matrix<NumericalType>(basisFunctionPoly.order, basisFunctionPoly.order, 0) {
+
+        Matrix<NumericalType> dL_ik = basisFunctionPoly.derivative(quadraturePointGrid.getPoints());
+        Matrix<NumericalType> dL_jk = basisFunctionPoly.derivative(quadraturePointGrid.getPoints());
+
+        for (auto k = 0; k < quadraturePointGrid.getNPoints(); k++) {
+            for (auto j = 0; j < nodalPointGrid.getNPoints(); j++) {
+                for (auto i = 0; i < nodalPointGrid.getNPoints(); i++) {
+                    NumericalType w_k = quadraturePointGrid.getWeights()[k];
+                    NumericalType dphi_ik = dL_ik(i,k);
+                    NumericalType dphi_jk = dL_jk(j,k);
+                    this->operator()(i,j) += w_k * dphi_ik * dphi_jk;
+                }
+            }
+        }
+
+    }
+
+};
+
 class CGIDMatrix : public Matrix<int> {
 
 public:
@@ -141,6 +167,27 @@ struct CGDirectStiffnessSummationOperator {
                 for (auto i = 0; i < nOrder + 1; i++) {
                     int I = IDMatrix(i, e);
                     M(I,J) += (dx/2.0)*elementMatrix(i,j);
+                }
+            }
+        }
+
+        return M;
+    }
+
+    Matrix<NumericalType> operateWithInverseMetricTerm(Matrix<NumericalType>& elementMatrix) {
+        int nElements = (int) elements.size();
+        int nOrder = (int) IDMatrix.nRows() - 1;
+        int nPoints = nElements * nOrder + 1;
+
+        Matrix<NumericalType> M(nPoints, nPoints, 0);
+
+        for (auto e = 0; e < nElements; e++) {
+            double dx = elements[e].xUpper() - elements[e].xLower();
+            for (auto j = 0; j < nOrder + 1; j++) {
+                int J = IDMatrix(j, e);
+                for (auto i = 0; i < nOrder + 1; i++) {
+                    int I = IDMatrix(i, e);
+                    M(I,J) += (2.0/dx)*elementMatrix(i,j);
                 }
             }
         }
