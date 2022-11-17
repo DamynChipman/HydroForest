@@ -130,7 +130,6 @@ public:
             }
             else {
                 I = 0;
-                // J = 1;
                 this->operator()(I,I) = 1.0;
             }
 
@@ -142,27 +141,8 @@ public:
             }
             else {
                 I = this->nRows()-1;
-                // J = elements.size()-1;
                 this->operator()(I,I) = 1.0;
             }
-
-            // L = e-1;
-            // if (leftBoundaryType == BoundaryConditionType::Periodic) {
-            //     if (e == 0) L = elements.size()-1;
-            // }
-            // I = IDMatrix(0, e);
-            // J = IDMatrix(N, L);
-            // this->operator()(I,I) = 0.5;
-            // this->operator()(I,J) = 0.5;
-
-            // R = e + 1;
-            // if (rightBoundaryType == BoundaryConditionType::Periodic) {
-            //     if (e == elements.size()-1) R = 0;
-            // }
-            // I = IDMatrix(N, e);
-            // J = IDMatrix(0, R);
-            // this->operator()(I,I) = -0.5;
-            // this->operator()(I,J) = -0.5;
         }
 
     }

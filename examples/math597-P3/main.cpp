@@ -10,14 +10,10 @@ int PLOT_ID = 2;
 
 double f_RHS(double x) {
     return (1.0 - pow(M_PI,2))*sin(M_PI*x);
-    // double c = 2.0*M_PI;
-    // return -pow(c,2)*cos(c*x);
 }
 
 double q_exact(double x) {
     return sin(M_PI*x);
-    // double c = 2.0*M_PI;
-    // return cos(c*x);
 }
 
 double computeError(HydroForest::Vector<double>& qNumerical, HydroForest::Vector<double>& qExact) {
@@ -200,18 +196,7 @@ double solveDG(HydroForest::ElementMesh1D<double>& mesh, bool plotFlag) {
     HydroForest::DGGlobalCenteredFluxMatrix<double> F_IJ_q(elements, ID, HydroForest::BoundaryConditionType::Dirichlet, HydroForest::BoundaryConditionType::Neumann);
     HydroForest::DGGlobalCenteredFluxMatrix<double> F_IJ_Q(elements, ID, HydroForest::BoundaryConditionType::Dirichlet, HydroForest::BoundaryConditionType::Neumann);
 
-    // std::cout << "F_IJ_q = " << F_IJ_q << std::endl;
-    // std::cout << "F_IJ_Q = " << F_IJ_Q << std::endl;
-
     // Include the "action" of B_Q and B_q to F
-    HydroForest::Vector<double> leftBCVector_q(nDOFs, 0);
-    HydroForest::Vector<double> rightBCVector_q(nDOFs, 1);
-    HydroForest::Vector<double> leftBCVector_Q(nDOFs, 1);
-    HydroForest::Vector<double> rightBCVector_Q(nDOFs, -M_PI);
-    // F_IJ_q.setRow(0, leftBCVector_q);
-    // F_IJ_q.setRow(nDOFs-1, rightBCVector_q);
-    // F_IJ_Q.setRow(0, leftBCVector_Q);
-    // F_IJ_Q.setRow(nDOFs-1, rightBCVector_Q);
     F_IJ_q(0,0) = -0.5;
     F_IJ_q(nDOFs-1,nDOFs-1) = 1;
     F_IJ_Q(0,0) = -1;
@@ -220,15 +205,6 @@ double solveDG(HydroForest::ElementMesh1D<double>& mesh, bool plotFlag) {
     // Create intermediate matrices
     HydroForest::Matrix<double> Dhat_IJ_q = F_IJ_q - Dtilde_IJ;
     HydroForest::Matrix<double> Dhat_IJ_Q = F_IJ_Q - Dtilde_IJ;
-    // Dhat_IJ_q(0,0) = -0.5;
-    // Dhat_IJ_q(nDOFs-1, nDOFs-1) = 0.5;
-    // Dhat_IJ_Q(0,0) = 0;
-    // Dhat_IJ_Q(nDOFs-1, nDOFs-1) = -M_PI;
-
-    // Apply BC
-    // HydroForest::Vector<double> zeros(nDOFs, 0);
-    // Dhat_IJ_Q.setRow(nDOFs-1, zeros);
-    // Dhat_IJ_Q(nDOFs-1, nDOFs-1) = 1;
 
     // Create Helmholtz matrix
     HydroForest::Matrix<double> H_IJ = HydroForest::solve(M_IJ, Dhat_IJ_q);
@@ -299,10 +275,6 @@ double solveDG(HydroForest::ElementMesh1D<double>& mesh, bool plotFlag) {
             x_J[I] = x;
         }
     }
-
-    // std::cout << "q(x=-1) = " << q_J[0] << std::endl;
-    // std::cout << "dqdx(x=1) = " << (q_J[nDOFs-2] - q_J[nDOFs-1])/(x_J[nDOFs-2] - x_J[nDOFs-1]) << std::endl;
-    // std::cout << "-PI = " << -M_PI << std::endl;
 
     // Compute error
     double error = computeError(q_J, q_exact_J);
@@ -417,22 +389,6 @@ int main(int argc, char** argv) {
     plt::legend();
     plt::grid(true);
     plt::save("plot_convergance_" + scheme + "_" + integration + ".png");
-
-    // // Create the mesh
-    // int nElement = 4;
-    // int nOrder = 1;
-    // if (argc > 1) {
-    //     nElement = std::atoi(argv[1]);
-    //     nOrder = std::atoi(argv[2]);
-    // }
-    // double xLower = -1;
-    // double xUpper = 1;
-    // HydroForest::ElementMesh1D<double> mesh(xLower, xUpper, nElement, nOrder);
-
-    // // Solve using CG
-    // bool plotFlag = true;
-    // // double error = solveCG(mesh, plotFlag);
-    // double error = solveDG(mesh, plotFlag);
 
     return EXIT_SUCCESS;
 }
