@@ -313,6 +313,10 @@ public:
         return res;
     }
 
+    Vector<NumericalType> flatten() {
+        return {data_};
+    }
+
     friend std::ostream& operator<<(std::ostream& os, Matrix<NumericalType>& A) {
         os << "  [" << A.nRows() << " x " << A.nCols() << "]  " << std::endl;
         for (auto i = 0; i < A.nRows(); i++) {
@@ -648,6 +652,37 @@ NumericalType matrixInfNorm(Matrix<NumericalType>& A, Matrix<NumericalType>& B) 
         }
     }
     return maxDiff;
+
+}
+
+template<typename NumericalType>
+Matrix<NumericalType> kroneckerProduct(Matrix<NumericalType>& A, Matrix<NumericalType>& B) {
+
+    Matrix<NumericalType> C(A.nRows()*B.nRows(), A.nCols()*B.nCols(), 0);
+
+    for (auto i = 0; i < A.nRows(); i++) {
+        for (auto j = 0; j < A.nCols(); j++) {
+            for (auto k = 0; k < B.nRows(); k++) {
+                for (auto l = 0; l < B.nCols(); l++) {
+                    C(i*B.nRows() + k, j*B.nCols() + l) = A(i,j) * B(k,l);
+                }
+            }
+        }
+    }
+    return C;
+
+}
+
+template<typename NumericalType>
+Matrix<NumericalType> outerProduct(Vector<NumericalType> a, Vector<NumericalType> b) {
+
+    Matrix<NumericalType> C(a.size(), b.size());
+    for (auto i = 0; i < a.size(); i++) {
+        for (auto j = 0; j < b.size(); j++) {
+            C(i,j) = a[i]*b[j];
+        }
+    }
+    return C;
 
 }
 

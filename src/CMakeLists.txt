@@ -7,6 +7,7 @@ set_target_properties(HydroForest PROPERTIES EXPORT_NAME HydroForest)
 
 set(HYDRO_FOREST_SOURCE_FILES
     VTKBuilder.cpp
+    P4est.cpp
 )
 
 # set(HYDRO_FOREST_HEADER_FILES

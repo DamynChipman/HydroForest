@@ -1,9 +1,15 @@
 #ifndef HYDRO_FOREST_APP_HPP_
 #define HYDRO_FOREST_APP_HPP_
 
+#include <iostream>
+#include <string>
+#include <map>
+#include <variant>
+#include <cstdarg>
 #include <p4est.h>
 #include <petsc.h>
 #include "GenericSingleton.hpp"
+#include "Timer.hpp"
 #include "Logger.hpp"
 #include "Options.hpp"
 #include "Memory.hpp"
@@ -46,6 +52,8 @@ protected:
      * 
      */
     Options options_;
+
+    std::map<std::string, Timer> timers_;
 
 public:
 
@@ -125,6 +133,13 @@ public:
      * @return Options& 
      */
     Options& getOptions() { return options_; }
+
+    /**
+     * @brief Get the timers
+     * 
+     * @return std::map<std::string, Timer> 
+     */
+    std::map<std::string, Timer> timers() { return timers_; }
 
     /**
      * @brief Wrapper for `Logger.log()`

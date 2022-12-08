@@ -1,9 +1,20 @@
 #ifndef VTK_BUILDER_HPP_
 #define VTK_BUILDER_HPP_
 
+#include <map>
+#include <vector>
+
 #include "XMLTree.hpp"
 
 namespace HydroForest {
+
+enum PointCellDataTypeVTK {
+    SCALARS,
+    VECTORS,
+    NORMALS,
+    TENSORS,
+    TCOORDS
+};
 
 class DataArrayNodeBase {
     
@@ -21,6 +32,17 @@ public:
 
 };
 
+struct EmptyDataArrayNode : public DataArrayNodeBase {
+    EmptyDataArrayNode();
+    std::string getType();
+    std::string getName();
+    std::string getNumberOfComponents();
+    std::string getFormat();
+    std::string getRangeMin();
+    std::string getRangeMax();
+    std::string getData();
+};
+
 class RectilinearGridNodeBase {
 
 public:
@@ -35,7 +57,7 @@ class RectilinearGridVTK {
 public:
 
     RectilinearGridVTK();
-    void buildMesh(RectilinearGridNodeBase& mesh, DataArrayNodeBase& xCoords, DataArrayNodeBase& yCoords, DataArrayNodeBase& zCoords);
+    void buildMesh(RectilinearGridNodeBase& mesh, DataArrayNodeBase* xCoords, DataArrayNodeBase* yCoords, DataArrayNodeBase* zCoords);
     // void buildMesh(RectilinearGridNodeBase& mesh, DataArrayNodeBase& xCoords);
     void addPointData(DataArrayNodeBase& pointData);
     void addCellData(DataArrayNodeBase& cellData);
@@ -48,9 +70,85 @@ private:
     XMLNode root_;
 
     RectilinearGridNodeBase* mesh_;
+    EmptyDataArrayNode emptyDataArray_{};
     std::vector<DataArrayNodeBase*> coordsDataVector_;
     std::vector<DataArrayNodeBase*> pointDataVector_;
     std::vector<DataArrayNodeBase*> cellDataVector_;
+
+};
+
+class PointsVTK {
+
+public:
+
+    PointsVTK();
+    PointsVTK(std::vector<double> xPoints);
+    PointsVTK(std::vector<double> xPoints, std::vector<double> yPoints);
+    PointsVTK(std::vector<double> xPoints, std::vector<double> yPoints, std::vector<double> zPoints);
+
+    std::string getType();
+    std::string getName();
+    std::string getNumberOfComponents();
+    std::string getFormat();
+    int getNumberOfPoints();
+    std::string getData();
+
+    XMLNode* toVTK();
+
+protected:
+
+    std::vector<double> xPoints_;
+    std::vector<double> yPoints_;
+    std::vector<double> zPoints_;
+
+};
+
+class CellsVTK {
+
+public:
+
+    CellsVTK();
+    XMLNode* toVTK();
+
+protected:
+
+    DataArrayNodeBase* connectivity_;
+    DataArrayNodeBase* offsets_;
+    DataArrayNodeBase* types_;
+
+};
+
+class PointDataVTK {
+
+public:
+
+    PointDataVTK();
+    
+    void addEntry(PointCellDataTypeVTK dataType, DataArrayNodeBase& dataEntry);
+
+    XMLNode* toVTK();
+
+protected:
+
+    std::map<PointCellDataTypeVTK, std::vector<DataArrayNodeBase*>> entries_;
+
+};
+
+class UnstructuredGridVTK {
+
+public:
+
+    UnstructuredGridVTK(PointsVTK& pointsVTK, PointDataVTK& pointDataVTK);
+    void toVTK(std::string filename);
+
+protected:
+
+    bool meshComplete_ = false;
+
+    XMLNode root_;
+
+    PointsVTK& pointsVTK_;
+    PointDataVTK& pointDataVTK_;
 
 };
 

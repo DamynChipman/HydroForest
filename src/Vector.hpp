@@ -4,17 +4,22 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <string>
 #include <initializer_list>
+#include <algorithm>
+
+#include "VTKBuilder.hpp"
 
 namespace HydroForest {
 
 template<typename NumericalType>
-class Vector {
+class Vector : public DataArrayNodeBase {
 
 protected:
 
     std::size_t size_;
     std::vector<NumericalType> data_;
+    std::string name_ = "Vector";
 
 public:
 
@@ -567,6 +572,60 @@ public:
         }
         return *this;
     }
+
+    double norm() {
+        double res = 0;
+        for (auto i = 0; i < size_; i++) {
+            res += pow(data_[i], 2);
+        }
+        return sqrt(res);
+    }
+
+    Vector<NumericalType> normalize() {
+        Vector<NumericalType> res(size_);
+        double mag = this->norm();
+        for (auto i = 0; i < size_; i++) {
+            res[i] = data_[i] / mag;
+        }
+        return res;
+    }
+
+    std::string getType() {
+        return "Float32";
+    }
+
+    void setName(std::string name) {
+        name_ = name;
+    }
+
+    std::string getName() {
+        return name_;
+    }
+
+    std::string getNumberOfComponents() {
+        return "1";
+    }
+
+    std::string getFormat() {
+        return "ascii";
+    }
+
+    std::string getRangeMin() {
+        NumericalType min = *std::min_element(data_.begin(), data_.end());
+        return std::to_string(min);
+    }
+
+    std::string getRangeMax() {
+        NumericalType max = *std::max_element(data_.begin(), data_.end());
+        return std::to_string(max);
+    }
+
+    std::string getData() {
+        std::string str = "";
+        for (auto p : data_) { str += std::to_string(p) + " "; }
+        return str;
+    }
+
 
 };
 

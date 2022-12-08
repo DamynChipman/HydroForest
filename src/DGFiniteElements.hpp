@@ -7,6 +7,7 @@
 #include "Polynomial.hpp"
 #include "Element1D.hpp"
 #include "Mesh1D.hpp"
+#include "Grid2D.hpp"
 
 namespace HydroForest {
 
@@ -37,6 +38,34 @@ public:
 };
 
 template<typename NumericalType>
+class DGMassMatrix2D : public Matrix<NumericalType> {
+
+public:
+
+    DGMassMatrix2D(LobattoTensorProductGrid2D<NumericalType>& nodalPointGrid, LobattoTensorProductGrid2D<NumericalType>& quadraturePointGrid) :
+        Matrix<NumericalType>(nodalPointGrid.xSize()*nodalPointGrid.ySize(), nodalPointGrid.xSize()*nodalPointGrid.ySize(), 0) {
+
+        //
+        int M = quadraturePointGrid.xSize()*quadraturePointGrid.ySize();
+        int N = nodalPointGrid.xSize()*nodalPointGrid.ySize();
+        Matrix<NumericalType> phi = nodalPointGrid.basisMatrix(quadraturePointGrid);
+        Matrix<NumericalType> W = quadraturePointGrid.basisWeights();
+
+        for (auto k = 0; k < M; k++) {
+            for (auto i = 0; i < N; i++) {
+                for (auto j = 0; j < N; j++) {
+                    std::pair<int, int> ID = quadraturePointGrid.ID(k);
+                    NumericalType w_k = W(ID.first, ID.second);
+                    this->operator()(i, j) += w_k * phi(i,k) * phi(j,k);
+                }
+            }
+        }
+
+    }
+
+};
+
+template<typename NumericalType>
 class DGDerivativeMatrix : public Matrix<NumericalType> {
 
 public:
@@ -56,6 +85,35 @@ public:
                     NumericalType dphi_ik = dL_ik(i,k);
                     NumericalType phi_jk = L_jk(j,k);
                     this->operator()(i, j) += w_k * dphi_ik * phi_jk;
+                }
+            }
+        }
+
+    }
+
+};
+
+template<typename NumericalType>
+class DGDerivativeMatrix2D : public Matrix<NumericalType> {
+
+public:
+
+    DGDerivativeMatrix2D(LobattoTensorProductGrid2D<NumericalType>& nodalPointGrid, LobattoTensorProductGrid2D<NumericalType>& quadraturePointGrid) :
+        Matrix<NumericalType>(nodalPointGrid.xSize()*nodalPointGrid.ySize(), nodalPointGrid.xSize()*nodalPointGrid.ySize(), 0) {
+
+        //
+        int M = quadraturePointGrid.xSize()*quadraturePointGrid.ySize();
+        int N = nodalPointGrid.xSize()*nodalPointGrid.ySize();
+        Matrix<NumericalType> phi = nodalPointGrid.basisMatrix(quadraturePointGrid);
+        Matrix<NumericalType> dphi = nodalPointGrid.basisDerivativeMatrix(quadraturePointGrid);
+        Matrix<NumericalType> W = quadraturePointGrid.basisWeights();
+
+        for (auto k = 0; k < M; k++) {
+            for (auto i = 0; i < N; i++) {
+                for (auto j = 0; j < N; j++) {
+                    std::pair<int, int> ID = quadraturePointGrid.ID(k);
+                    NumericalType w_k = W(ID.first, ID.second);
+                    this->operator()(i, j) += w_k * dphi(i,k) * phi(j,k);
                 }
             }
         }

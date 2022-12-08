@@ -19,7 +19,7 @@ class Grid1DBase {
 
 public:
 
-    virtual Vector<FloatingDataType> getPoints() = 0;
+    virtual Vector<FloatingDataType>& getPoints() = 0;
     virtual Vector<FloatingDataType> getWeights() = 0;
     virtual std::size_t getNPoints() = 0;
     virtual FloatingDataType getLowerBound() = 0;
@@ -135,7 +135,7 @@ public:
         return (1.0) / (sqrt(1.0 - pow(x, 2)));
     }
 
-    Vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType>& getPoints() { return points_; }
     Vector<FloatingDataType> getWeights() { return weights_; }
     std::size_t getNPoints() { return points_.size(); }
     FloatingDataType getLowerBound() { return -1.0; }
@@ -203,7 +203,7 @@ private:
 };
 
 template <typename FloatingDataType>
-class LobattoGrid1D : public Grid1DBase<FloatingDataType> {
+class LobattoGrid1D : public Grid1DBase<FloatingDataType>, public DataArrayNodeBase {
 
 public:
 
@@ -256,12 +256,47 @@ public:
 
     }
 
-    Vector<FloatingDataType> getPoints() { return points_; }
+    std::size_t order() { return order_; }
+    Vector<FloatingDataType>& getPoints() { return points_; }
     Vector<FloatingDataType> getWeights() { return weights_; }
     std::size_t getNPoints() { return points_.size(); }
     FloatingDataType getLowerBound() { return -1.0; }
     FloatingDataType getUpperBound() { return 1.0; }
     FloatingDataType operator[](std::size_t index) { return points_[index]; }
+
+    std::string getType() {
+        return "Float32";
+    }
+
+    std::string getName() {
+        return "LobattoGrid";
+    }
+
+    std::string getNumberOfComponents() {
+        return "1";
+    }
+
+    std::string getFormat() {
+        return "ascii";
+    }
+
+    std::string getRangeMin() {
+        return "-1.0";
+    }
+
+    std::string getRangeMax() {
+        return "1.0";
+    }
+
+    std::string getData() {
+        std::string pointsAsString = "";
+        for (auto i = 0; i < points_.size(); i++) {
+            pointsAsString+= std::to_string(points_[i]) + " ";
+        }
+        // for (auto& p : points_) pointsAsString += std::to_string(p) + " ";
+        return pointsAsString;
+    }
+
 
 private:
 
