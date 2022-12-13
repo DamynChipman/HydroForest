@@ -12,6 +12,10 @@ struct SpaceVector2D : public Vector<FloatingDataType> {
         Vector<FloatingDataType>({x,y})
             {}
 
+    SpaceVector2D(Vector<FloatingDataType> v) :
+        Vector<FloatingDataType>({v[0], v[1]})
+            {}
+
     FloatingDataType x() { return this->operator[](0); }
     FloatingDataType y() { return this->operator[](1); }
 

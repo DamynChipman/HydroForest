@@ -21,8 +21,20 @@ public:
 
     // LobattoTensorProductGrid2D() {}
     LobattoTensorProductGrid2D(std::size_t xOrder, std::size_t yOrder) :
-        xGrid_(xOrder), yGrid_(yOrder), xPoly_(xGrid_.getPoints()), yPoly_(yGrid_.getPoints())
-            {}
+        xGrid_(xOrder), yGrid_(yOrder), xPoly_(xGrid_.getPoints()), yPoly_(yGrid_.getPoints()), faceIndexSets_(4) {
+
+        //
+        faceIndexSets_[0] = Vector<int>(xSize()); // South
+        faceIndexSets_[1] = Vector<int>(ySize()); // East
+        faceIndexSets_[2] = Vector<int>(xSize()); // North
+        faceIndexSets_[3] = Vector<int>(ySize()); // West
+
+        for (auto i = 0; i < xSize(); i++) faceIndexSets_[0][i] = i;
+        for (auto j = 0; j < ySize(); j++) faceIndexSets_[1][j] = (j + 1)*(xSize()) - 1;
+        for (auto i = 0; i < xSize(); i++) faceIndexSets_[2][i] = (ySize() - 1)*ySize() + i;
+        for (auto j = 0; j < ySize(); j++) faceIndexSets_[3][j] = j*xSize();
+
+    }
 
     // struct Iterator
     // {
@@ -74,6 +86,7 @@ public:
     std::size_t ySize() { return yGrid_.getNPoints(); }
 
     std::size_t size() { return xGrid_.getNPoints() * yGrid_.getNPoints(); }
+    std::vector<Vector<int>>& faceIndexSets() { return faceIndexSets_; }
 
     Matrix<FloatingDataType> basisMatrix(LobattoTensorProductGrid2D<FloatingDataType>& quadratureGrid) {
         Matrix<FloatingDataType> psi_x = xPoly_(quadratureGrid.xPoints());
@@ -108,6 +121,7 @@ protected:
     LobattoGrid1D<FloatingDataType> yGrid_;
     LagrangePolynomial xPoly_;
     LagrangePolynomial yPoly_;
+    std::vector<Vector<int>> faceIndexSets_;
 
 };
 

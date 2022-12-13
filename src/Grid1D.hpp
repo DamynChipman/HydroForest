@@ -53,7 +53,7 @@ public:
         }
     }
 
-    Vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType>& getPoints() { return points_; }
     Vector<FloatingDataType> getWeights() { return Vector<FloatingDataType>(points_.size(), 1.0); }
     std::size_t getNPoints() { return points_.size(); }
     FloatingDataType getLowerBound() { return lowerBound_; }
@@ -187,7 +187,7 @@ public:
 
     }
 
-    Vector<FloatingDataType> getPoints() { return points_; }
+    Vector<FloatingDataType>& getPoints() { return points_; }
     Vector<FloatingDataType> getWeights() { return weights_; }
     std::size_t getNPoints() { return points_.size(); }
     FloatingDataType getLowerBound() { return -1.0; }
