@@ -638,6 +638,16 @@ static Vector<int> vectorRange(int start, int end) {
     return res;
 }
 
+template<typename FloatingDataType>
+static Vector<FloatingDataType> vectorLinspace(FloatingDataType a, FloatingDataType b, int N) {
+    FloatingDataType dx = (b - a) / (N - 1);
+    Vector<FloatingDataType> res(N);
+    for (auto i = 0; i < N; i++) {
+        res[i] = dx*i + a;
+    }
+    return res;
+}
+
 template<typename NumericalType>
 Vector<NumericalType> operator*(NumericalType lhs, Vector<NumericalType> rhs) {
     Vector<NumericalType> res(rhs.size());

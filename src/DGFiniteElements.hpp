@@ -91,6 +91,37 @@ public:
 };
 
 template<typename NumericalType>
+class DGMassMatrixInexact2D : public Vector<NumericalType> {
+
+public:
+
+    DGMassMatrixInexact2D(QuadElement2D<NumericalType>& element) : 
+        Vector<NumericalType>(element.referenceGrid().size()) {
+
+        //
+        int N = element.referenceGrid().size();
+        Matrix<NumericalType> W = element.referenceGrid().basisWeights();
+        for (auto i = 0; i < N; i++) {
+            std::pair<int, int> ID = element.referenceGrid().ID(i);
+            NumericalType w_i = W(ID.first, ID.second);
+            NumericalType J_i = element.vector("jacobian")[i];
+            // this->operator[](i) = w_i * J_i;
+            this->operator[](i) = J_i;
+        }
+
+    }
+
+    Vector<NumericalType> inverse() {
+        Vector<NumericalType> res(this->size());
+        for (auto i = 0; i < this->size(); i++) {
+            res[i] = 1.0 / this->operator[](i);
+        }
+        return res;
+    }
+
+};
+
+template<typename NumericalType>
 class DGDerivativeMatrix : public Matrix<NumericalType> {
 
 public:

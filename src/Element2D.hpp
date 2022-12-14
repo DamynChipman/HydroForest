@@ -1,6 +1,7 @@
 #ifndef ELEMENT_2D_HPP_
 #define ELEMENT_2D_HPP_
 
+#include <cmath>
 #include <vector>
 #include <string>
 #include <map>
@@ -79,6 +80,7 @@ protected:
     LobattoTensorProductGrid2D<FloatingDataType> quadratureGrid_;
     std::map<std::string, Vector<FloatingDataType>> vecs_;
     std::map<std::string, Matrix<FloatingDataType>> mats_;
+    FloatingDataType area_;
 
 public:
 
@@ -99,6 +101,11 @@ public:
             normals_[f] = normals_[f].normalize();
         }
 
+        // Compute area
+        SpaceVector2D<FloatingDataType> l0 = points_[1] - points_[0];
+        SpaceVector2D<FloatingDataType> l1 = points_[3] - points_[0];
+        area_ = -l0.y()*l1.x() + l0.x()*l1.y();
+
         // Create physical grid via mapping
         Vector<FloatingDataType>& physicalGridpointsX = physicalGrid_.xGrid().getPoints();
         Vector<FloatingDataType>& physicalGridpointsY = physicalGrid_.yGrid().getPoints();
@@ -114,24 +121,38 @@ public:
         }
 
         // Compute transformation matrices
-        Matrix<FloatingDataType> dh_dxi = referenceGrid_.xPoly().derivative(quadratureGrid_.xPoints());
-        Matrix<FloatingDataType> h_eta = referenceGrid_.yPoly()(quadratureGrid_.yPoints());
-        Matrix<FloatingDataType> h_xi = referenceGrid_.xPoly()(quadratureGrid_.xPoints());
-        Matrix<FloatingDataType> dh_deta = referenceGrid_.yPoly().derivative(quadratureGrid_.yPoints());
+        // Matrix<FloatingDataType> dh_dxi = referenceGrid_.xPoly().derivative(quadratureGrid_.xPoints());
+        // Matrix<FloatingDataType> h_eta = referenceGrid_.yPoly()(quadratureGrid_.yPoints());
+        // Matrix<FloatingDataType> h_xi = referenceGrid_.xPoly()(quadratureGrid_.xPoints());
+        // Matrix<FloatingDataType> dh_deta = referenceGrid_.yPoly().derivative(quadratureGrid_.yPoints());
+        // Matrix<FloatingDataType> dpsi_dxi = kroneckerProduct(dh_dxi, h_eta);
+        // Matrix<FloatingDataType> dpsi_deta = kroneckerProduct(h_xi, dh_deta);
+        Matrix<FloatingDataType> dh_dxi = referenceGrid_.xPoly().derivative(referenceGrid_.xPoints());
+        Matrix<FloatingDataType> h_eta = referenceGrid_.yPoly()(referenceGrid_.yPoints());
+        Matrix<FloatingDataType> h_xi = referenceGrid_.xPoly()(referenceGrid_.xPoints());
+        Matrix<FloatingDataType> dh_deta = referenceGrid_.yPoly().derivative(referenceGrid_.yPoints());
         Matrix<FloatingDataType> dpsi_dxi = kroneckerProduct(dh_dxi, h_eta);
         Matrix<FloatingDataType> dpsi_deta = kroneckerProduct(h_xi, dh_deta);
 
         // Compute metric terms (Algorithm 12.1)
-        Vector<FloatingDataType> dx_dxi(quadratureGrid_.size(), 0);
-        Vector<FloatingDataType> dx_deta(quadratureGrid_.size(), 0);
-        Vector<FloatingDataType> dy_dxi(quadratureGrid_.size(), 0);
-        Vector<FloatingDataType> dy_deta(quadratureGrid_.size(), 0);
-        Vector<FloatingDataType> dxi_dx(quadratureGrid_.size(), 0);
-        Vector<FloatingDataType> dxi_dy(quadratureGrid_.size(), 0);
-        Vector<FloatingDataType> deta_dx(quadratureGrid_.size(), 0);
-        Vector<FloatingDataType> deta_dy(quadratureGrid_.size(), 0);
-        vecs_["jacobian"] = Vector<FloatingDataType>(quadratureGrid_.size(), 0);
-        for (auto k = 0; k < quadratureGrid_.size(); k++) {
+        // Vector<FloatingDataType> dx_dxi(quadratureGrid_.size(), 0);
+        // Vector<FloatingDataType> dx_deta(quadratureGrid_.size(), 0);
+        // Vector<FloatingDataType> dy_dxi(quadratureGrid_.size(), 0);
+        // Vector<FloatingDataType> dy_deta(quadratureGrid_.size(), 0);
+        // Vector<FloatingDataType> dxi_dx(quadratureGrid_.size(), 0);
+        // Vector<FloatingDataType> dxi_dy(quadratureGrid_.size(), 0);
+        // Vector<FloatingDataType> deta_dx(quadratureGrid_.size(), 0);
+        // Vector<FloatingDataType> deta_dy(quadratureGrid_.size(), 0);
+        Vector<FloatingDataType> dx_dxi(referenceGrid_.size(), 0);
+        Vector<FloatingDataType> dx_deta(referenceGrid_.size(), 0);
+        Vector<FloatingDataType> dy_dxi(referenceGrid_.size(), 0);
+        Vector<FloatingDataType> dy_deta(referenceGrid_.size(), 0);
+        Vector<FloatingDataType> dxi_dx(referenceGrid_.size(), 0);
+        Vector<FloatingDataType> dxi_dy(referenceGrid_.size(), 0);
+        Vector<FloatingDataType> deta_dx(referenceGrid_.size(), 0);
+        Vector<FloatingDataType> deta_dy(referenceGrid_.size(), 0);
+        vecs_["jacobian"] = Vector<FloatingDataType>(referenceGrid_.size(), 0);
+        for (auto k = 0; k < referenceGrid_.size(); k++) {
             for (auto i = 0; i < referenceGrid_.size(); i++) {
                 SpaceVector2D<FloatingDataType> xi = referenceGrid_(i);
                 SpaceVector2D<FloatingDataType> x = mapReference2Physical(xi);
@@ -141,9 +162,9 @@ public:
                 dy_deta[k] += dpsi_deta(i,k)*x.y();
             }
         }
-        for (auto k = 0; k < quadratureGrid_.size(); k++) {
+        for (auto k = 0; k < referenceGrid_.size(); k++) {
             // vecs_["jacobian"][k] = vecs_["dx_dxi"][k]*vecs_["dy_deta"][k] - vecs_["dx_deta"][k]*vecs_["dy_dxi"][k];
-            vecs_["jacobian"][k] = dx_deta[k]*dy_dxi[k] - dx_dxi[k]*dy_deta[k];
+            vecs_["jacobian"][k] = dx_deta[k]*dy_dxi[k] - dx_dxi[k]*dy_deta[k]; // ???
             // dxi_dx[k] = dy_deta[k] / vecs_["jacobian"][k];
             // dxi_dy[k] = -dx_deta[k] / vecs_["jacobian"][k];
             // deta_dx[k] = -dy_dxi[k] / vecs_["jacobian"][k];
@@ -175,6 +196,7 @@ public:
     Matrix<FloatingDataType>& matrix(std::string name) { return mats_[name]; }
     int ID() { return ID_; }
     std::size_t size() { return referenceGrid_.size(); }
+    FloatingDataType area() { return area_; }
 
     void setBoundary(int faceIndex, InternalBoundary<FloatingDataType>& boundary) {
         boundaries_[faceIndex] = &boundary;
@@ -222,21 +244,15 @@ public:
             Matrix<FloatingDataType> h_eta = referenceGrid_.yPoly()(referenceGrid_.yPoints());
             Matrix<FloatingDataType> h_xi = referenceGrid_.xPoly()(referenceGrid_.xPoints());
             Matrix<FloatingDataType> dh_deta = referenceGrid_.yPoly().derivative(referenceGrid_.yPoints());
-            dpsi_x = kroneckerProduct(dh_dxi, h_eta);
-            dpsi_y = kroneckerProduct(h_xi, dh_deta);
+            dpsi_y = kroneckerProduct(dh_dxi, h_eta);
+            dpsi_x = kroneckerProduct(h_xi, dh_deta);
         }
 
-        for (auto i = 0; i < N; i++) {
-            for (auto j = 0; j < N; j++) {
-                std::pair<int, int> ID = quadratureGrid_.ID(j);
+        for (auto j = 0; j < N; j++) {
+            for (auto i = 0; i < N; i++) {
+                std::pair<int, int> ID = referenceGrid_.ID(j);
                 FloatingDataType w_j = W(ID.first, ID.second);
                 FloatingDataType J_j = vecs_["jacobian"][j];
-
-                FloatingDataType dpsi_x_ij = dpsi_x(i,j);
-                FloatingDataType dpsi_y_ij = dpsi_y(i,j);
-                FloatingDataType flux_x_j = flux_x[j];
-                FloatingDataType flux_y_j = flux_y[j];
-                FloatingDataType dot = (dpsi_x(i,j)*flux_x[j] + dpsi_y(i,j)*flux_y[j]);
 
                 R[i] += w_j * J_j * (dpsi_x(i,j)*flux_x[j] + dpsi_y(i,j)*flux_y[j]);
             }
@@ -256,6 +272,8 @@ public:
         Vector<FloatingDataType>& q_internal = vecs_["q"];
         Vector<FloatingDataType>& flux_x_internal = vecs_["fx"];
         Vector<FloatingDataType>& flux_y_internal = vecs_["fy"];
+        Vector<FloatingDataType>& u_x_internal = vecs_["ux"];
+        Vector<FloatingDataType>& u_y_internal = vecs_["uy"];
         SpaceVector2D<FloatingDataType>& nhat = normals_[faceIndexInternal];
         Vector<FloatingDataType> w = (faceIndexInternal % 2) ? referenceGrid_.yWeights() : referenceGrid_.xWeights();
         Vector<FloatingDataType>& J = vecs_["jacobian"];
@@ -266,20 +284,19 @@ public:
         Vector<FloatingDataType>& q_external = neighbor.vector("q");
         Vector<FloatingDataType>& flux_x_external = neighbor.vector("fx");
         Vector<FloatingDataType>& flux_y_external = neighbor.vector("fy");
+        Vector<FloatingDataType>& u_x_external = neighbor.vector("ux");
+        Vector<FloatingDataType>& u_y_external = neighbor.vector("uy");
 
         for (auto i = 0; i < IS_internal.size(); i++) {
             int ii = IS_internal[i];
 
-            FloatingDataType lambda = 1.0;
+            FloatingDataType u_internal = fabs(u_x_internal[i]*nhat.x() + u_y_internal[i]*nhat.y());
+            FloatingDataType u_external = fabs(u_x_external[i]*nhat.x() + u_y_external[i]*nhat.y());
+            FloatingDataType lambda = fmax(u_internal, u_external);
             FloatingDataType f_star_x = 0.5*(flux_x_internal[ii] + flux_x_external[ii] - lambda*(q_external[ii] - q_internal[ii])*nhat.x());
             FloatingDataType f_star_y = 0.5*(flux_y_internal[ii] + flux_y_external[ii] - lambda*(q_external[ii] - q_internal[ii])*nhat.y());
 
-            FloatingDataType w_ii = w[ii];
-            FloatingDataType J_ii = J[ii];
-            FloatingDataType nhat_x = nhat.x();
-            FloatingDataType nhat_y = nhat.y();
-
-            R[ii] -= w[ii] * J[ii] * (f_star_x*nhat.x() + f_star_y*nhat.y());
+            R[ii] += w[i] * J[ii] * (f_star_x*nhat.x() + f_star_y*nhat.y());
         }
 
         return R;
